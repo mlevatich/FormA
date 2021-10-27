@@ -1,0 +1,5 @@
+CSEE6863
+*.log
+*.o
+.DS_Store
+.DS_Store?
