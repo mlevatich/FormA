@@ -3,3 +3,4 @@ CSEE6863
 *.o
 .DS_Store
 .DS_Store?
+tags

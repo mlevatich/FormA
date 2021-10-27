@@ -21,5 +21,10 @@ cd csee6863-project
 make
 ```
 
-Process for linux is probably similar, just need to find sdl2 and sdl2_mixer
-somewhere such that they're visible to the linker.
+For Arch:
+```
+sudo pacman -S sdl2 sdl2_mixer
+git clone git@github.com:mlevatich/csee6863-project.git
+cd csee6863-project
+make
+```
