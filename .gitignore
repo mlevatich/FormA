@@ -4,3 +4,10 @@ CSEE6863
 .DS_Store
 .DS_Store?
 tags
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.pdf
+*.gz

@@ -8,10 +8,6 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 
-\title{COMS 6863 Final Project}
-\author{Max Levatich \& Wonhyuk (Harry) Choi}
-\date{\today}
-
 \newtheorem{conjecture}{Conjecture}[section]
 \newtheorem{corollary}{Corollary}
 \newtheorem{definition}{Definition}[section]
@@ -20,10 +16,73 @@
 \newcommand{\LTLglobally}{\Box}
 \newcommand{\LTLeventually}{\Diamond}
 \newcommand{\LTLnext}{\bigcirc}
+\newcommand{\Name}{\textit{GameTitle}}
+
+\title{COMS 6863 Final Project Proposal: \Name{}}
+\author{Max Levatich \& Wonhyuk (Harry) Choi}
+\date{\today}
 
 \begin{document}
 \maketitle
 
-FooBarBaz
+\section{Introduction}
+
+    Our aim is to design, program, and verify via model-checking a lightweight
+    video game called \Name{}. \Name{} is based loosely on (Asteroids? Pong?
+    Mario?); the player (briefly describe how the game is played).
+
+    \Name{} will be implemented in C, with the help of the low-level rendering
+    library SDL. We will use CBMC \cite{clarke2004tool} to model-check
+    certain properties of the game as we develop it, including collision
+    detection, collision resolution, and input correspondence. We will submit:
+
+    \begin{enumerate}
+        \item{The game's code and assets}
+        \item{Build instructions, including how to invoke CBMC}
+        \item{A correctness specification of the properties checked}
+        \item{A final project report detailing our process}
+    \end{enumerate}
+
+\section{Game Overview}
+
+    \subsection{Implementation}
+
+        \Name{} is written in C (C11 standard) and depends on Simple DirectMedia
+        Layer 2.0 (SDL). SDL is a development library written in C which
+        provides a simple low-level interface to the keyboard, audio, and
+        graphics hardware necessary to program a video game. We will use CBMC
+        to model-check the game (see Section 4).
+
+        We will use the traditional game programming technique of a \textit{game
+        loop} located in the main file, where each iteration of the loop
+        represents one \textit{frame}, in which we read user input, update the
+        game state, and render the game state to the screen. Modules and
+        functions will be designed specifically to provide a minimal interface
+        to the model-checked portions of our code. We aim to have verified
+        modules which encapsulate specific features of the game (e.g. collision
+        detection, keyboard input).
+
+    \subsection{Mechanics}
+
+        TODO: Describe how the game is played in detail, with emphasis on the
+        core algorithms like collision detection and resolution that we model
+        check.
+
+\section{Correctness Specification}
+
+    \subsection{Collision Handling}
+
+        TODO: LTL formulas and descriptions here!
+
+    \subsection{Input Correspondance}
+
+        TODO: LTL formulas and descriptions here!
+
+\section{Verification Approach}
+
+    TODO: Describe CBMC, describe how we will use it as we develop the game.
+
+\bibliographystyle{IEEEtran}
+\bibliography{proposal}
 
 \end{document}
