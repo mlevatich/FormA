@@ -16,8 +16,7 @@
 \newcommand{\LTLglobally}{\Box}
 \newcommand{\LTLeventually}{\Diamond}
 \newcommand{\LTLnext}{\bigcirc}
-\newcommand{\Name}{\textit{GameTitle}}
-% FIXME: any ideas for the name of the game?
+\newcommand{\Name}{\textit{FormA}\xspace}
 
 \title{COMS 6863 Final Project Proposal: \Name{}}
 \author{Max Levatich \& Wonhyuk (Harry) Choi}
@@ -29,7 +28,8 @@
 \section{Introduction}
 
     Our aim is to design, program, and verify via model-checking a lightweight
-    video game called \Name{}. \Name{} is based loosely on the classic arcade
+	video game called \Name, \emph{Formal verified Asteroids}.
+	\Name is based loosely on the classic arcade
     game \textit{Asteroids} \cite{asteroids}; the player controls a small
     spaceship, viewed from a top-down perspective, and must avoid or shoot down
     incoming asteroids from all directions. The player receives points based on
@@ -69,7 +69,7 @@
     \subsection{Gameplay}
 
         In \Name{}, the player will use the arrow keys on the keyboard to
-        control a "spaceship". The up arrow applies a force to the ship in the
+        control a ``spaceship''. The up arrow applies a force to the ship in the
         direction that it is facing, while the left and right arrows turn the
         ship in place. This allows the player to navigate a 2D plane which wraps
         around. Asteroids will spawn randomly outside of the boundaries of the
@@ -82,17 +82,15 @@
         interesting properties for us to model check, including:
 
         \begin{enumerate}
-            \item{Non-game-ending collisions with "bouncy" objects. This allows
+            \item{Non-game-ending collisions with ``bouncy'' objects. This allows
                   us to model-check properties like conservation of momentum
                   (subject to energy dissipation).}
-            \item{Obstacle courses constructed out of "planetary" objects which
+            \item{Obstacle courses constructed out of ``planetary'' objects which
                   induce a gravitational field on the ship and asteroids. This
                   allows us to model check the proper application of the force
                   of gravity.}
+			\item{``Lives'' and an ``invincibility'' mode after losing a life}
         \end{enumerate}
-
-        % FIXME: any fun features you want to add? Or things that would be
-        % cool to model check?
 
     \subsection{Algorithms}
 
@@ -116,8 +114,6 @@
     what kinds of properties we can effectively check. Here are some initial CTL
     formulas we plan to check.
 
-    % FIXME: other ideas for formulas
-
     \subsection{Collision Handling}
 
         $AG(\forall obj. obj \neq ship \implies \lnot touching(obj,ship))$
@@ -132,6 +128,13 @@
         $AG(keydown(RIGHT) \land \lnot keydown(LEFT) \implies ship.omega = -ANGULAR\_VEL)$
 
         $AG(keydown(LEFT) \land keydown(RIGHT) \implies ship.omega = 0)$
+	
+	\subsection{Asteroid Leaves Screen}
+	
+		\begin{align*}
+			AG((asteroid.x < 0 \lor end < asteroid.x) \land 
+			(asteroid.y < 0 \lor end < asteroid.y))
+		\end{align*}
 
 \section{Verification Approach}
 
@@ -147,7 +150,8 @@
     frame of the game is a state transition, they can be viewed as AG() CTL
     formulas.
 
-    % FIXME: describe how our coding process will integrate CBMC
+	We plan to integrate CBMC as a developmental procedure, just like regression testing might be used in a software development cycle.
+	Creating the assertions themselves will help with the design process, and model checking will show that we have the correct implementation with respect to the specification.
 
 \bibliographystyle{IEEEtran}
 \bibliography{proposal}
