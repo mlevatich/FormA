@@ -1,7 +1,7 @@
 ## FormA
 
 Herein are documented the adventures of Max Levatich and Harry Choi as they
-model check a game.
+model check FormA, a game based on Asteroids!
 
 ## Build
 
@@ -16,15 +16,15 @@ brew install sdl2
 brew install sdl2_mixer
 
 # building the game
-git clone git@github.com:mlevatich/csee6863-project.git
-cd csee6863-project
+git clone git@github.com:mlevatich/FormA.git
+cd FormA
 make
 ```
 
 For Arch:
 ```
 sudo pacman -S sdl2 sdl2_mixer
-git clone git@github.com:mlevatich/csee6863-project.git
-cd csee6863-project
+git clone git@github.com:mlevatich/FormA.git
+cd FormA
 make
 ```

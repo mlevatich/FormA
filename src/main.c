@@ -160,12 +160,12 @@ int main(int argc, char** argv)
     {
         if(!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
         {
-            printf("CSEE6863 1.0.0\n");
+            printf("FormA 1.0.0\n");
             return 0;
         }
         else if(!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
         {
-            printf("\nCSEE6863 1.0.0\n\n");
+            printf("\nFormA 1.0.0\n\n");
             printf("Options\n");
             printf("----------------\n");
             printf("-v, --version        print version information\n");
