@@ -1,4 +1,4 @@
-## CSEE6863 Project: A game
+## FormA
 
 Herein are documented the adventures of Max Levatich and Harry Choi as they
 model check a game.

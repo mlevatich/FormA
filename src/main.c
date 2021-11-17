@@ -4,14 +4,23 @@
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
+typedef struct Sprite
+{
+    bool active;
+    SDL_Texture* t;
+    int w;
+    int h;
+    int x;
+    int y;
+    int theta;
+}
+Sprite;
+
 // Game state is captured by this data structure
 typedef struct State
 {
-    SDL_Texture* box_texture;
-    int box_w;
-    int box_h;
-    int box_x;
-    int box_y;
+    Sprite* ship;
+    long long time;
 }
 State;
 
@@ -28,6 +37,25 @@ SDL_Texture* loadTexture(const char* path)
     return newTexture;
 }
 
+// Load new sprite into the game
+Sprite* loadSprite(bool a, int w, int h, int x, int y, const char* path)
+{
+    Sprite* s = malloc(sizeof(Sprite));
+    s->active = a;
+    s->t = loadTexture(path);
+    s->w = w; s->h = h;
+    s->x = x; s->y = y;
+    s->theta = 0;
+    return s;
+}
+
+// Destroy sprite memory
+void unloadSprite(Sprite* s)
+{
+    SDL_DestroyTexture(s->t);
+    free(s);
+}
+
 // Load SDL and initialize the window, renderer, audio, and data
 bool loadGame(State* s)
 {
@@ -35,7 +63,7 @@ bool loadGame(State* s)
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return false;
 
     // Create window
-    window = SDL_CreateWindow("CSEE6863", 20, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    window = SDL_CreateWindow("FormA", 20, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     if(!window) return false;
 
     // Create renderer for window
@@ -46,11 +74,10 @@ bool loadGame(State* s)
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
     // Initial state
-    s->box_w = 16;
-    s->box_h = 16;
-    s->box_x = SCREEN_WIDTH / 2 - (s->box_w / 2);
-    s->box_y = SCREEN_HEIGHT / 2 - (s->box_h / 2);
-    s->box_texture = loadTexture("graphics/box.bmp");
+    int center_x = SCREEN_WIDTH / 2 - 10;
+    int center_y = SCREEN_HEIGHT / 2 - 10;
+    s->ship = loadSprite(true, 20, 20, center_x, center_y, "graphics/ship.bmp");
+    s->time = 0;
 
     return true;
 }
@@ -63,7 +90,7 @@ void quitGame(State* s)
     SDL_DestroyWindow(window);
 
     // Free state
-    SDL_DestroyTexture(s->box_texture);
+    unloadSprite(s->ship);
 
     // Free SDL
     SDL_Quit();
@@ -76,22 +103,21 @@ void handleKeydown(State* s, int key)
 }
 
 // Use keyboard state to update the game state
-void updateGame(State* s)
+void updateGame(State* s, const Uint8* keys)
 {
-    int box_speed = 3;
-    const Uint8* keys = SDL_GetKeyboardState(NULL);
-    if (keys[SDL_SCANCODE_UP])    s->box_y -= box_speed;
-    if (keys[SDL_SCANCODE_DOWN])  s->box_y += box_speed;
-    if (keys[SDL_SCANCODE_LEFT])  s->box_x -= box_speed;
-    if (keys[SDL_SCANCODE_RIGHT]) s->box_x += box_speed;
+    int ship_speed = 3;
+    if (keys[SDL_SCANCODE_UP])    s->ship->y -= ship_speed;
+    if (keys[SDL_SCANCODE_DOWN])  s->ship->y += ship_speed;
+    if (keys[SDL_SCANCODE_LEFT])  s->ship->x -= ship_speed;
+    if (keys[SDL_SCANCODE_RIGHT]) s->ship->x += ship_speed;
 }
 
 // Render the entire game state each frame
 void renderGame(const State* s)
 {
-    SDL_Rect src = { 0, 0, s->box_w, s->box_h };
-    SDL_Rect dst = { s->box_x, s->box_y, s->box_w, s->box_h };
-    SDL_RenderCopy(renderer, s->box_texture, &src, &dst);
+    SDL_Rect src = { 0, 0, s->ship->w, s->ship->h };
+    SDL_Rect dst = { s->ship->x, s->ship->y, s->ship->w, s->ship->h };
+    SDL_RenderCopy(renderer, s->ship->t, &src, &dst);
 }
 
 int main(int argc, char** argv)
@@ -154,7 +180,8 @@ int main(int argc, char** argv)
 
         // Update the game state for this frame, based on current game state
         // and current keyboard state
-        updateGame(&s);
+        const Uint8* keys = SDL_GetKeyboardState(NULL);
+        updateGame(&s, keys);
 
         // Render changes to screen based on current game state
         SDL_RenderClear(renderer);

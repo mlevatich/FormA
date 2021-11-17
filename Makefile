@@ -8,6 +8,6 @@ SRC    = src
 %.o: $(SRC)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-CSEE6863: $(OBJ)
+FormA: $(OBJ)
 	$(CC) $(LIBS) -o $@ $^ $(CFLAGS)
 	rm -f *.o
