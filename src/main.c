@@ -10,9 +10,12 @@ typedef struct Sprite
     SDL_Texture* t;
     int w;
     int h;
-    int x;
-    int y;
-    int theta;
+    double x;
+    double y;
+    double theta;
+    double dx;
+    double dy;
+    double omega;
 }
 Sprite;
 
@@ -20,7 +23,6 @@ Sprite;
 typedef struct State
 {
     Sprite* ship;
-    long long time;
 }
 State;
 
@@ -38,14 +40,19 @@ SDL_Texture* loadTexture(const char* path)
 }
 
 // Load new sprite into the game
-Sprite* loadSprite(bool a, int w, int h, int x, int y, const char* path)
+Sprite* loadSprite(bool a, int w, int h, double x, double y, const char* path)
 {
     Sprite* s = malloc(sizeof(Sprite));
     s->active = a;
     s->t = loadTexture(path);
-    s->w = w; s->h = h;
-    s->x = x; s->y = y;
-    s->theta = 0;
+    s->w = w;
+    s->h = h;
+    s->x = x;
+    s->y = y;
+    s->theta = M_PI_2;
+    s->dx = 0;
+    s->dy = 0;
+    s->omega = 0;
     return s;
 }
 
@@ -57,7 +64,7 @@ void unloadSprite(Sprite* s)
 }
 
 // Load SDL and initialize the window, renderer, audio, and data
-bool loadGame(State* s)
+bool loadGame(State* st)
 {
     // Initialize SDL
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return false;
@@ -74,50 +81,76 @@ bool loadGame(State* s)
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
     // Initial state
-    int center_x = SCREEN_WIDTH / 2 - 10;
-    int center_y = SCREEN_HEIGHT / 2 - 10;
-    s->ship = loadSprite(true, 20, 20, center_x, center_y, "graphics/ship.bmp");
-    s->time = 0;
+    double c_x = SCREEN_WIDTH / 2 - 10;
+    double c_y = SCREEN_HEIGHT / 2 - 10;
+    st->ship = loadSprite(true, 20, 20, c_x, c_y, "graphics/ship.bmp");
 
     return true;
 }
 
 // Free all resources and quit SDL
-void quitGame(State* s)
+void quitGame(State* st)
 {
     // Free renderer and window
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
     // Free state
-    unloadSprite(s->ship);
+    unloadSprite(st->ship);
 
     // Free SDL
     SDL_Quit();
 }
 
 // Use keydown events to update the game state
-void handleKeydown(State* s, int key)
+void handleKeydown(State* st, int key)
 {
 
 }
 
 // Use keyboard state to update the game state
-void updateGame(State* s, const Uint8* keys)
+void updateGame(State* st, const Uint8* keys)
 {
-    int ship_speed = 3;
-    if (keys[SDL_SCANCODE_UP])    s->ship->y -= ship_speed;
-    if (keys[SDL_SCANCODE_DOWN])  s->ship->y += ship_speed;
-    if (keys[SDL_SCANCODE_LEFT])  s->ship->x -= ship_speed;
-    if (keys[SDL_SCANCODE_RIGHT]) s->ship->x += ship_speed;
+    Sprite* s = st->ship;
+
+    // Constants
+    double thrust = 0.08;
+    double thrust_damp = 0.99;
+    double torque = 0.003;
+    double torque_damp = 0.95;
+
+    // Damping force based on velocity (simulates friction / resistance)
+    s->dx *= thrust_damp;
+    s->dy *= thrust_damp;
+    s->omega *= torque_damp;
+
+    // Apply forces based on keystate
+    if (keys[SDL_SCANCODE_UP]) {
+        s->dx += thrust * cos(s->theta);
+        s->dy -= thrust * sin(s->theta);
+    }
+    if (keys[SDL_SCANCODE_LEFT]) {
+        s->omega += torque;
+    }
+    if (keys[SDL_SCANCODE_RIGHT]) {
+        s->omega -= torque;
+    }
+
+    // Propagate to derived quantities
+    s->x += s->dx;
+    s->y += s->dy;
+    s->theta += s->omega;
 }
 
 // Render the entire game state each frame
-void renderGame(const State* s)
+void renderGame(const State* st)
 {
-    SDL_Rect src = { 0, 0, s->ship->w, s->ship->h };
-    SDL_Rect dst = { s->ship->x, s->ship->y, s->ship->w, s->ship->h };
-    SDL_RenderCopy(renderer, s->ship->t, &src, &dst);
+    Sprite* s = st->ship;
+
+    SDL_Rect src = { 0, 0, s->w, s->h };
+    SDL_Rect dst = { (int) s->x, (int) s->y, s->w, s->h };
+    double rot = -s->theta * (180.0 / M_PI);
+    SDL_RenderCopyEx(renderer, s->t, &src, &dst, rot, NULL, SDL_FLIP_NONE);
 }
 
 int main(int argc, char** argv)
@@ -148,8 +181,8 @@ int main(int argc, char** argv)
     }
 
     // Load game, make initial state
-    State s;
-    if(!loadGame(&s))
+    State st;
+    if(!loadGame(&st))
     {
         fprintf(stderr, "Error: Initialization Failed\n");
         return 1;
@@ -174,18 +207,18 @@ int main(int argc, char** argv)
             if(e.type == SDL_KEYDOWN)
             {
                 int key = e.key.keysym.sym;
-                handleKeydown(&s, key);
+                handleKeydown(&st, key);
             }
         }
 
         // Update the game state for this frame, based on current game state
         // and current keyboard state
         const Uint8* keys = SDL_GetKeyboardState(NULL);
-        updateGame(&s, keys);
+        updateGame(&st, keys);
 
         // Render changes to screen based on current game state
         SDL_RenderClear(renderer);
-        renderGame(&s);
+        renderGame(&st);
         SDL_RenderPresent(renderer);
 
         // Cap framerate at MAX_FPS
@@ -196,6 +229,6 @@ int main(int argc, char** argv)
     }
 
     // Free all resources and exit game
-    quitGame(&s);
+    quitGame(&st);
     return 0;
 }
