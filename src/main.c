@@ -1,17 +1,11 @@
 #include "../headers/constants.h"
 #include "../headers/forma.h"
+#include "../headers/asteroid.h"
 
 // Window and renderer, used by all modules
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
-struct Asteroid
-{
-	struct Asteroid* prev;
-	struct Asteroid* next;
-	Sprite* sprite;
-};
-typedef struct Asteroid Asteroid;
 
 // Game state is captured by this data structure
 typedef struct State
