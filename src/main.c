@@ -1,6 +1,7 @@
 #include "../headers/constants.h"
 #include "../headers/forma.h"
 #include "../headers/asteroid.h"
+#include <assert.h>
 
 // Window and renderer, used by all modules
 SDL_Window* window = NULL;
@@ -166,6 +167,8 @@ void renderGame(const State* st)
 
 int main(int argc, char** argv)
 {
+	__CPROVER_assume(0 < 11);
+
     // Parse command line arguments
     if(argc > 1)
     {

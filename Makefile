@@ -1,4 +1,4 @@
-CC     = gcc
+CC     = goto-cc
 CFLAGS = -g3 -std=c99 -pedantic -Wall
 LIBS   = -lSDL2 -lSDL2_mixer -lm
 DEPS   = headers/constants.h
