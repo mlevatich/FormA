@@ -1,23 +1,9 @@
 #include "../headers/constants.h"
+#include "../headers/forma.h"
 
 // Window and renderer, used by all modules
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-
-typedef struct Sprite
-{
-    bool active;
-    SDL_Texture* t;
-    int w;
-    int h;
-    double x;
-    double y;
-    double theta;
-    double dx;
-    double dy;
-    double omega;
-}
-Sprite;
 
 struct Asteroid
 {
