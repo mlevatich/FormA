@@ -19,10 +19,20 @@ typedef struct Sprite
 }
 Sprite;
 
+struct Asteroid
+{
+	struct Asteroid* prev;
+	struct Asteroid* next;
+	Sprite* sprite;
+};
+typedef struct Asteroid Asteroid;
+
 // Game state is captured by this data structure
 typedef struct State
 {
+	long score;
     Sprite* ship;
+	Asteroid* asteroids; // linked list of asteroids
 }
 State;
 
@@ -81,9 +91,10 @@ bool loadGame(State* st)
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
     // Initial state
-    double c_x = SCREEN_WIDTH / 2 - 10;
-    double c_y = SCREEN_HEIGHT / 2 - 10;
+    double c_x = (double) SCREEN_WIDTH / 2 - 10;
+    double c_y = (double) SCREEN_HEIGHT / 2 - 10;
     st->ship = loadSprite(true, 20, 20, c_x, c_y, "graphics/ship.bmp");
+	st->asteroids = NULL;
 
     return true;
 }
@@ -103,9 +114,20 @@ void quitGame(State* st)
 }
 
 // Use keydown events to update the game state
+// TODO: What is this?
 void handleKeydown(State* st, int key)
 {
 
+}
+
+bool planeCollided(const State* st)
+{
+	Asteroid* asteroid = st->asteroids;
+	while (asteroid != NULL) {
+		// TODO: collision logic
+		asteroid  = asteroid->next;
+	}
+	return false;
 }
 
 // Use keyboard state to update the game state
@@ -137,10 +159,18 @@ void updateGame(State* st, const Uint8* keys)
     }
 
     // Propagate to derived quantities
+	// TODO: Check Out Of Bounds
     s->x += s->dx;
     s->y += s->dy;
     s->theta += s->omega;
+
+	// TODO: spawn asteroids
+
+	if (planeCollided(st)) {
+		// TODO: send gameOver signal
+	}
 }
+
 
 // Render the entire game state each frame
 void renderGame(const State* st)
@@ -151,6 +181,7 @@ void renderGame(const State* st)
     SDL_Rect dst = { (int) s->x, (int) s->y, s->w, s->h };
     double rot = -s->theta * (180.0 / M_PI);
     SDL_RenderCopyEx(renderer, s->t, &src, &dst, rot, NULL, SDL_FLIP_NONE);
+
 }
 
 int main(int argc, char** argv)
@@ -225,7 +256,7 @@ int main(int argc, char** argv)
         double ms_per_frame = 1000.0 / MAX_FPS;
         int sleep_time = ms_per_frame - (SDL_GetTicks() - start_time);
         if(sleep_time > 0) SDL_Delay(sleep_time);
-        frame++;
+        frame++; // TODO: is this used anywhere?
     }
 
     // Free all resources and exit game
