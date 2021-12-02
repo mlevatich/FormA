@@ -96,7 +96,7 @@ void quitGame(State* st)
 
 // Use keydown events to update the game state
 // TODO: What is this?
-void handleKeydown(State* st, int key)
+void handleKeypress(State* st, int key)
 {
 
 }
@@ -140,10 +140,15 @@ void updateGame(State* st, const Uint8* keys)
     }
 
     // Propagate to derived quantities
-	// TODO: Check Out Of Bounds
     s->x += s->dx;
     s->y += s->dy;
     s->theta += s->omega;
+
+    // Screen wrap
+    if(s->x > SCREEN_WIDTH)  s->x = 0;
+    if(s->y > SCREEN_HEIGHT) s->y = 0;
+    if(s->x < 0 - s->w)      s->x = SCREEN_WIDTH;
+    if(s->y < 0 - s->h)      s->y = SCREEN_HEIGHT;
 
 	// TODO: spawn asteroids
 
@@ -167,7 +172,7 @@ void renderGame(const State* st)
 
 int main(int argc, char** argv)
 {
-	__CPROVER_assume(0 < 11);
+	// __CPROVER_assume(0 < 11);
 
     // Parse command line arguments
     if(argc > 1)
@@ -220,7 +225,7 @@ int main(int argc, char** argv)
             if(e.type == SDL_KEYDOWN)
             {
                 int key = e.key.keysym.sym;
-                handleKeydown(&st, key);
+                handleKeypress(&st, key);
             }
         }
 
