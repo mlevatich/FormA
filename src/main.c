@@ -69,7 +69,7 @@ bool loadGame(State* st)
     if(!renderer) return false;
 
     // Initialize renderer color and image loading
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
     // Initial state
     double c_x = (double) SCREEN_WIDTH / 2 - 10;
@@ -203,7 +203,6 @@ int main(int argc, char** argv)
     }
 
     // Game loop
-    long long frame = 0;
     bool quit = false;
     while(!quit)
     {
@@ -239,7 +238,6 @@ int main(int argc, char** argv)
         double ms_per_frame = 1000.0 / MAX_FPS;
         int sleep_time = ms_per_frame - (SDL_GetTicks() - start_time);
         if(sleep_time > 0) SDL_Delay(sleep_time);
-        frame++; // TODO: is this used anywhere?
     }
 
     // Free all resources and exit game
