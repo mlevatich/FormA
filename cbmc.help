@@ -1,0 +1,144 @@
+
+* *               CBMC 5.11 (cbmc-5.11) 64-bit              * *
+* *                 Copyright (C) 2001-2018                 * *
+* *              Daniel Kroening, Edmund Clarke             * *
+* * Carnegie Mellon University, Computer Science Department * *
+* *                 kroening@kroening.com                   * *
+* *        Protected in part by U.S. patent 7,225,417       * *
+
+Usage:                       Purpose:
+
+ cbmc [-?] [-h] [--help]      show help
+ cbmc file.c ...              source file names
+
+Analysis options:
+ --show-properties            show the properties, but don't run analysis
+ --symex-coverage-report f    generate a Cobertura XML coverage report in f
+ --property id                only check one specific property
+ --stop-on-fail               stop analysis once a failed property is detected
+ --trace                      give a counterexample trace for failed properties
+
+C/C++ frontend options:
+ -I path                      set include path (C/C++)
+ -D macro                     define preprocessor macro (C/C++)
+ --preprocess                 stop after preprocessing
+ --16, --32, --64             set width of int
+ --LP64, --ILP64, --LLP64,
+   --ILP32, --LP32            set width of int, long and pointers
+ --little-endian              allow little-endian word-byte conversions
+ --big-endian                 allow big-endian word-byte conversions
+ --unsigned-char              make "char" unsigned by default
+ --mm model                   set memory model (default: sc)
+ --arch                       set architecture (default: x86_64)
+ --os                         set operating system (default: linux)
+ --c89/99/11                  set C language standard (default: c11)
+ --cpp98/03/11                set C++ language standard (default: cpp98)
+ --no-arch                    don't set up an architecture
+ --no-library                 disable built-in abstract C library
+ --round-to-nearest           rounding towards nearest even (default)
+ --round-to-plus-inf          rounding towards plus infinity
+ --round-to-minus-inf         rounding towards minus infinity
+ --round-to-zero              rounding towards zero
+ --max-nondet-tree-depth N    limit size of nondet (e.g. input) object tree;
+                              at level N pointers are set to null
+ --min-null-tree-depth N      minimum level at which a pointer can first be
+                              NULL in a recursively nondet initialized struct
+ --function name              set main function name
+
+Program representations:
+ --show-parse-tree            show parse tree
+ --show-symbol-table          show loaded symbol table
+ --show-goto-functions        show loaded goto program
+ --list-goto-functions        list loaded goto functions
+
+Program instrumentation options:
+ --bounds-check               enable array bounds checks
+ --pointer-check              enable pointer checks
+ --memory-leak-check          enable memory leak checks
+ --div-by-zero-check          enable division by zero checks
+ --signed-overflow-check      enable signed arithmetic over- and underflow checks
+ --unsigned-overflow-check    enable arithmetic over- and underflow checks
+ --pointer-overflow-check     enable pointer arithmetic over- and underflow checks
+ --conversion-check           check whether values can be represented after type cast
+ --undefined-shift-check      check shift greater than bit-width
+ --float-overflow-check       check floating-point for +/-Inf
+ --nan-check                  check floating-point for NaN
+ --no-built-in-assertions     ignore assertions in built-in library
+ --no-assertions              ignore user assertions
+ --no-assumptions             ignore user assumptions
+ --error-label label          check that label is unreachable
+ --cover CC                   create test-suite with coverage criterion CC
+ --mm MM                      memory consistency model for concurrent programs
+ --fp-reachability-slice f    remove instructions that cannot appear on a trace
+                              that visits all given functions. The list of
+                              functions has to be given as a comma separated
+                              list f.
+ --reachability-slice         remove instructions that cannot appear on a trace
+                              from entry point to a property
+ --reachability-slice-fb      remove instructions that cannot appear on a trace
+                              from entry point through a property
+ --full-slice                 run full slicer (experimental)
+ --drop-unused-functions      drop functions trivially unreachable from main function
+
+Semantic transformations:
+ --nondet-static              add nondeterministic initialization of variables with static lifetime
+
+BMC options:
+ --paths [strategy]           explore paths one at a time
+ --show-symex-strategies      list strategies for use with --paths
+ --program-only               only show program expression
+ --show-loops                 show the loops in the program
+ --depth nr                   limit search depth
+ --unwind nr                  unwind nr times
+ --unwindset L:B,...          unwind loop L with a bound of B
+                              (use --show-loops to get the loop IDs)
+ --show-vcc                   show the verification conditions
+ --slice-formula              remove assignments unrelated to property
+ --unwinding-assertions       generate unwinding assertions (cannot be
+                              used with --cover or --partial-loops)
+ --partial-loops              permit paths with partial loops
+ --no-self-loops-to-assumptions
+                              do not simplify while(1){} to assume(0)
+ --no-pretty-names            do not simplify identifiers
+ --graphml-witness filename   write the witness in GraphML format to filename
+
+Backend options:
+ --object-bits n              number of bits used for object addresses
+ --dimacs                     generate CNF in DIMACS format
+ --beautify                   beautify the counterexample (greedy heuristic)
+ --localize-faults            localize faults (experimental)
+ --smt2                       use default SMT2 solver (Z3)
+ --boolector                  use Boolector
+ --cprover-smt2               use CPROVER SMT2 solver
+ --cvc4                       use CVC4
+ --mathsat                    use MathSAT
+ --yices                      use Yices
+ --z3                         use Z3
+ --refine                     use refinement procedure (experimental)
+ --refine-strings             use string refinement (experimental)
+ --string-printable           restrict to printable strings (experimental)
+ --outfile filename           output formula to given file
+ --arrays-uf-never            never turn arrays into uninterpreted functions
+ --arrays-uf-always           always turn arrays into uninterpreted functions
+
+Other options:
+ --version                    show version and exit
+ --xml-ui                     use XML-formatted output
+ --xml-interface              bi-directional XML interface
+ --json-ui                    use JSON-formatted output
+ --validate-goto-model        enable additional well-formedness checks on the
+                              goto program
+ --validate-ssa-equation      enable additional well-formedness checks on the
+                              SSA representation
+ --trace-json-extended        add rawLhs property to trace
+ --trace-show-function-calls  show function calls in plain trace
+ --trace-show-code            show original code in plain trace
+ --trace-hex                  represent plain trace values in hex
+ --compact-trace              give a compact trace
+ --stack-trace                give a stack trace only
+ --flush                      flush every line of output
+ --verbosity #                verbosity level
+ --timestamp <monotonic|wall> print microsecond-precision timestamps.
+                              monotonic: stamps increase monotonically.
+                              wall: ISO-8601 wall clock timestamps.
+

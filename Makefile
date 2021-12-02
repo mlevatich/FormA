@@ -1,4 +1,4 @@
-CC     = goto-cc
+CC     = gcc
 CFLAGS = -g3 -std=c99 -pedantic -Wall
 LIBS   = -lSDL2 -lSDL2_mixer -lm
 DEPS   = headers/constants.h
@@ -11,3 +11,6 @@ SRC    = src
 FormA: $(OBJ)
 	$(CC) $(LIBS) -o $@ $^ $(CFLAGS)
 	rm -f *.o
+
+clean:
+	rm -f FormA
