@@ -3,10 +3,9 @@
 #include "../headers/asteroid.h"
 #include <assert.h>
 
-// Window and renderer, used by all modules
+// Window and renderer
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-
 
 // Game state is captured by this data structure
 typedef struct State
@@ -47,11 +46,57 @@ Sprite* loadSprite(bool a, int w, int h, double x, double y, const char* path)
     return s;
 }
 
-// Destroy sprite memory
-void unloadSprite(Sprite* s)
+Sprite* spawnAsteroid()
 {
-    SDL_DestroyTexture(s->t);
-    free(s);
+    int ast_w = 92;
+    int ast_h = 89;
+
+    double ratio = SCREEN_WIDTH / SCREEN_HEIGHT;
+    double weighted_chance = ratio * 0.5;
+
+    double x = 0.0;
+    double y = 0.0;
+    double dx = getRand() * 2.0 + 1;
+    double dy = getRand() * 2.0 + 1;
+    double where = getRand();
+    if(where < weighted_chance / 2) {
+        x = getRand() * (SCREEN_WIDTH - ast_w);
+        y = 0 - ast_h;
+        dx /= 2;
+    }
+    else if(where < weighted_chance) {
+        x = getRand() * (SCREEN_WIDTH - ast_w);
+        y = SCREEN_HEIGHT;
+        dx /= 2;
+        dy *= -1;
+    }
+    else if(where < weighted_chance + (1 - weighted_chance) / 2) {
+        y = getRand() * (SCREEN_HEIGHT - ast_h);
+        x = 0 - ast_w;
+        dy /= 2;
+    }
+    else {
+        y = getRand() * (SCREEN_HEIGHT - ast_h);
+        x = SCREEN_WIDTH;
+        dy /= 2;
+        dx *= -1;
+    }
+
+    Sprite* a = loadSprite(true, ast_w, ast_h, x, y, "graphics/asteroid.bmp");
+    a->dx = dx;
+    a->dy = dy;
+    a->omega = getRand() * 0.1 - 0.05;
+    return a;
+}
+
+void ensureAsteroids(State* st)
+{
+    if(!st->asteroids) {
+        st->asteroids = malloc(sizeof(Asteroid));
+        st->asteroids->next = NULL;
+        st->asteroids->prev = NULL;
+        st->asteroids->sprite = spawnAsteroid();
+    }
 }
 
 // Load SDL and initialize the window, renderer, audio, and data
@@ -71,13 +116,37 @@ bool loadGame(State* st)
     // Initialize renderer color and image loading
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
+    // True random seed
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    srand(tm.tv_sec + tm.tv_usec * 1000000ul);
+
     // Initial state
     double c_x = (double) SCREEN_WIDTH / 2 - 10;
     double c_y = (double) SCREEN_HEIGHT / 2 - 10;
     st->ship = loadSprite(true, 20, 20, c_x, c_y, "graphics/ship.bmp");
-	st->asteroids = NULL;
+    st->asteroids = NULL;
+    ensureAsteroids(st);
 
     return true;
+}
+
+// Destroy a sprite
+void unloadSprite(Sprite* s)
+{
+    SDL_DestroyTexture(s->t);
+    free(s);
+}
+
+// Destroy asteroid linked list
+void unloadAsteroids(Asteroid* a)
+{
+    while(a) {
+        unloadSprite(a->sprite);
+        Asteroid* p = a;
+        a = a->next;
+        free(p);
+    }
 }
 
 // Free all resources and quit SDL
@@ -89,6 +158,7 @@ void quitGame(State* st)
 
     // Free state
     unloadSprite(st->ship);
+    unloadAsteroids(st->asteroids);
 
     // Free SDL
     SDL_Quit();
@@ -111,12 +181,12 @@ bool planeCollided(const State* st)
 	return false;
 }
 
-// Use keyboard state to update the game state
-void updateGame(State* st, const Uint8* keys)
+// Move the ship through space according to our "laws" of physics each frame
+void moveShip(State* st, const Uint8* keys)
 {
     Sprite* s = st->ship;
 
-    // Constants
+    // Ship parameters
     double thrust = 0.08;
     double thrust_damp = 0.99;
     double torque = 0.003;
@@ -145,29 +215,103 @@ void updateGame(State* st, const Uint8* keys)
     s->theta += s->omega;
 
     // Screen wrap
-    if(s->x > SCREEN_WIDTH)  s->x = 0;
-    if(s->y > SCREEN_HEIGHT) s->y = 0;
+    if(s->x > SCREEN_WIDTH)  s->x = 0 - s->w;
+    if(s->y > SCREEN_HEIGHT) s->y = 0 - s->h;
     if(s->x < 0 - s->w)      s->x = SCREEN_WIDTH;
     if(s->y < 0 - s->h)      s->y = SCREEN_HEIGHT;
+}
 
-	// TODO: spawn asteroids
+// Move the asteroids through space according to "laws" of physics each frame
+// No forces are applied to asteroids, they just travel through space.
+// They don't wrap around the screen either.
+void moveAsteroids(State* st)
+{
+    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+        Sprite* s = a->sprite;
+        s->x += s->dx;
+        s->y += s->dy;
+        s->theta += s->omega;
+    }
+}
 
+// Small chance of spawning a new asteroid this frame, randomly placed,
+// if there are less than 10 asteroids out already
+void checkSpawnAsteroid(State* st)
+{
+    double spawn_chance = 0.06;
+    int max_asteroids = 12;
+
+    int n = 1;
+    Asteroid* a = st->asteroids;
+    for(; a->next != NULL; a = a->next, n++);
+    if(n < max_asteroids && getRand() < spawn_chance) {
+        a->next = malloc(sizeof(Asteroid));
+        a->next->next = NULL;
+        a->next->prev = a;
+        a->next->sprite = spawnAsteroid();
+    }
+}
+
+void checkDespawnAsteroids(State* st)
+{
+    int radius = 100;
+    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+        Sprite* s = a->sprite;
+        if(s->x > SCREEN_WIDTH  + radius || s->x + s->w < 0 - radius ||
+           s->y > SCREEN_HEIGHT + radius || s->y + s->h < 0 - radius) {
+            if(a->next) a->next->prev = a->prev;
+            if(a->prev) a->prev->next = a->next;
+            else        st->asteroids = a->next;
+            unloadSprite(s);
+            free(a);
+        }
+    }
+
+    // If there are no asteroids left, force one to spawn
+    ensureAsteroids(st);
+}
+
+// Use keyboard state to update the game state
+void updateGame(State* st, const Uint8* keys)
+{
+    // Ship moves
+    moveShip(st, keys);
+
+    // Asteroids move
+    moveAsteroids(st);
+
+    // Is ship colliding with any asteroids?
 	if (planeCollided(st)) {
 		// TODO: send gameOver signal
 	}
+
+    // When an asteroid goes off screen,
+    // it is despawned to make room for more
+    checkDespawnAsteroids(st);
+
+    // Each frame, a new asteroid might spawn
+    checkSpawnAsteroid(st);
 }
 
-
-// Render the entire game state each frame
-void renderGame(const State* st)
+// Render a single sprite
+void renderSprite(const Sprite* s)
 {
-    Sprite* s = st->ship;
-
     SDL_Rect src = { 0, 0, s->w, s->h };
     SDL_Rect dst = { (int) s->x, (int) s->y, s->w, s->h };
     double rot = -s->theta * (180.0 / M_PI);
     SDL_RenderCopyEx(renderer, s->t, &src, &dst, rot, NULL, SDL_FLIP_NONE);
+}
 
+// Render the entire game state each frame
+void renderGame(const State* st)
+{
+    // Ship
+    renderSprite(st->ship);
+
+    // Asteroids
+    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+        renderSprite(a->sprite);
+    }
 }
 
 int main(int argc, char** argv)
