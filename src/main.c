@@ -270,7 +270,8 @@ void checkDespawnAsteroids(State* st)
     int radius = 100;
 
     // Iterate over all asteroids
-    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+    Asteroid* a = st->asteroids;
+    while(a) {
 
         // If the asteroid is off screen
         Sprite* s = a->sprite;
@@ -282,7 +283,12 @@ void checkDespawnAsteroids(State* st)
             if(a->prev) a->prev->next = a->next;
             else        st->asteroids = a->next;
             unloadSprite(s);
-            free(a);
+            Asteroid* tmp = a;
+            a = a->next;
+            free(tmp);
+        }
+        else {
+            a = a->next;
         }
     }
 
