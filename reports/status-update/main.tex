@@ -153,6 +153,34 @@
 	We plan to integrate CBMC as a developmental procedure, just like regression testing might be used in a software development cycle.
 	Creating the assertions themselves will help with the design process, and model checking will show that we have the correct implementation with respect to the specification.
 
+\section{Project Progress}
+So far, we have created the basics of our game, as shown in Figure~\ref{fig:gameplay}.
+The game involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
+
+\begin{figure}[!h]
+    \includegraphics[width=\linewidth]{gameplay.png}
+    \caption{Screenshot of \Name}
+    \label{fig:gameplay}
+\end{figure}
+
+However, we are currently struggling with applying \texttt{CBMC} to our project.
+Our game relies on the use of the \texttt{SDL} library, but the library does not work well with \texttt{CBMC}.
+A simple file \texttt{main.c} such as 
+\begin{verbatim}
+#include<SDL2/SDL.h>
+int main(){}
+\end{verbatim}
+results in the following error in Figure~\ref{fig:cbmc-sdl}, even though the code runs properly.
+This behavior is consistent whether we use \texttt{cbmc} or \texttt{goto-cc}, and whether we use the \texttt{--no-library} option.
+
+\begin{figure}[!h]
+    \includegraphics[width=\linewidth]{cbmc-sdl.png}
+    \caption{Error with SDL2 and CBMC}
+    \label{fig:cbmc-sdl}
+\end{figure}
+
+Our current idea is to decouple our codebase from SDL, so that we can check it without SDL, pending any advice or suggestions from the instructors.
+
 \bibliographystyle{IEEEtran}
 \bibliography{proposal}
 
