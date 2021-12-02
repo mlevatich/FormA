@@ -33,7 +33,6 @@ SDL_Texture* loadTexture(const char* path)
 Sprite* loadSprite(bool a, int w, int h, double x, double y, const char* path)
 {
     Sprite* s = malloc(sizeof(Sprite));
-    s->active = a;
     s->t = loadTexture(path);
     s->w = w;
     s->h = h;
@@ -51,7 +50,7 @@ Sprite* spawnAsteroid()
     int ast_w = 92;
     int ast_h = 89;
 
-    double ratio = SCREEN_WIDTH / SCREEN_HEIGHT;
+    double ratio = (double) SCREEN_WIDTH / (double) SCREEN_HEIGHT;
     double weighted_chance = ratio * 0.5;
 
     double x = 0.0;
@@ -89,6 +88,8 @@ Sprite* spawnAsteroid()
     return a;
 }
 
+// If the linked list is empty, creates it and inserts an asteroid, to make
+// sure there is never an empty linked list.
 void ensureAsteroids(State* st)
 {
     if(!st->asteroids) {
@@ -102,6 +103,10 @@ void ensureAsteroids(State* st)
 // Load SDL and initialize the window, renderer, audio, and data
 bool loadGame(State* st)
 {
+    // Ship size
+    int ship_w = 20;
+    int ship_h = 20;
+
     // Initialize SDL
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return false;
 
@@ -122,9 +127,11 @@ bool loadGame(State* st)
     srand(tm.tv_sec + tm.tv_usec * 1000000ul);
 
     // Initial state
-    double c_x = (double) SCREEN_WIDTH / 2 - 10;
-    double c_y = (double) SCREEN_HEIGHT / 2 - 10;
-    st->ship = loadSprite(true, 20, 20, c_x, c_y, "graphics/ship.bmp");
+    double c_x = (double) (SCREEN_WIDTH - ship_w) / 2;
+    double c_y = (double) (SCREEN_HEIGHT - ship_h) / 2;
+    st->ship = loadSprite(true, ship_w, ship_h, c_x, c_y, "graphics/ship.bmp");
+
+    // "seed" the linked list with one asteroid - we don't want it to be empty.
     st->asteroids = NULL;
     ensureAsteroids(st);
 
@@ -234,16 +241,20 @@ void moveAsteroids(State* st)
     }
 }
 
-// Small chance of spawning a new asteroid this frame, randomly placed,
-// if there are less than 10 asteroids out already
+// There is a chance of spawning a new asteroid each frame, randomly placed,
+// if there are less than the maximum number of asteroids out already
 void checkSpawnAsteroid(State* st)
 {
-    double spawn_chance = 0.06;
+    // Controls how many asteroids are on screen
+    double spawn_chance = 0.05;
     int max_asteroids = 12;
 
+    // Jump to end of list, counting length along the way
     int n = 1;
     Asteroid* a = st->asteroids;
     for(; a->next != NULL; a = a->next, n++);
+
+    // If we're under capacity, chance to append new asteroid to list
     if(n < max_asteroids && getRand() < spawn_chance) {
         a->next = malloc(sizeof(Asteroid));
         a->next->next = NULL;
@@ -252,13 +263,21 @@ void checkSpawnAsteroid(State* st)
     }
 }
 
+// Handles garbage collection of asteroids after they've left the screen
 void checkDespawnAsteroids(State* st)
 {
+    // How far off screen an asteroid should be before it is despawned
     int radius = 100;
+
+    // Iterate over all asteroids
     for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+
+        // If the asteroid is off screen
         Sprite* s = a->sprite;
         if(s->x > SCREEN_WIDTH  + radius || s->x + s->w < 0 - radius ||
            s->y > SCREEN_HEIGHT + radius || s->y + s->h < 0 - radius) {
+
+            // If so, remove it from linked list and delete it
             if(a->next) a->next->prev = a->prev;
             if(a->prev) a->prev->next = a->next;
             else        st->asteroids = a->next;
@@ -268,6 +287,7 @@ void checkDespawnAsteroids(State* st)
     }
 
     // If there are no asteroids left, force one to spawn
+    // (linked list should never be empty)
     ensureAsteroids(st);
 }
 
@@ -309,9 +329,7 @@ void renderGame(const State* st)
     renderSprite(st->ship);
 
     // Asteroids
-    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
-        renderSprite(a->sprite);
-    }
+    for(Asteroid* a = st->asteroids; a; a = a->next) renderSprite(a->sprite);
 }
 
 int main(int argc, char** argv)

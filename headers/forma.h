@@ -15,7 +15,6 @@ SDL_Texture* loadTexture(const char* path);
 
 typedef struct Sprite
 {
-    bool active;
     SDL_Texture* t;
     int w;
     int h;
