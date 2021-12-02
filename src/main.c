@@ -45,35 +45,49 @@ Sprite* loadSprite(bool a, int w, int h, double x, double y, const char* path)
     return s;
 }
 
+// Create a new asteroid at a random position off the edge of the screen,
+// with a random inward velocity
 Sprite* spawnAsteroid()
 {
+    // Width and height of the asteroid
     int ast_w = 92;
     int ast_h = 89;
 
+    // Weight the chances towards spawning an asteroid on the longer edge, to
+    // even out the distribution of where they appear across the perimeter
     double ratio = (double) SCREEN_WIDTH / (double) SCREEN_HEIGHT;
     double weighted_chance = ratio * 0.5;
 
+    // Values to fill
     double x = 0.0;
     double y = 0.0;
     double dx = getRand() * 2.0 + 1;
     double dy = getRand() * 2.0 + 1;
+
+    // From the top of the screen, with downward velocity
     double where = getRand();
     if(where < weighted_chance / 2) {
         x = getRand() * (SCREEN_WIDTH - ast_w);
         y = 0 - ast_h;
         dx /= 2;
     }
+
+    // From the bottom of the screen, with upward velocity
     else if(where < weighted_chance) {
         x = getRand() * (SCREEN_WIDTH - ast_w);
         y = SCREEN_HEIGHT;
         dx /= 2;
         dy *= -1;
     }
+
+    // From the left of the screen, with rightward velocity
     else if(where < weighted_chance + (1 - weighted_chance) / 2) {
         y = getRand() * (SCREEN_HEIGHT - ast_h);
         x = 0 - ast_w;
         dy /= 2;
     }
+
+    // From the right of the screen, with leftward velofity
     else {
         y = getRand() * (SCREEN_HEIGHT - ast_h);
         x = SCREEN_WIDTH;
@@ -81,6 +95,7 @@ Sprite* spawnAsteroid()
         dx *= -1;
     }
 
+    // Load the sprite with the computed parameters
     Sprite* a = loadSprite(true, ast_w, ast_h, x, y, "graphics/asteroid.bmp");
     a->dx = dx;
     a->dy = dy;
