@@ -1,17 +1,18 @@
 #ifndef FORMA
 #define FORMA
 
+#ifdef USE_SDL
 #include <SDL2/SDL.h>
+#endif // USE_SDL
+#ifndef USE_SDL
+#include "mockSDL.h"
+#endif // USE_SDL
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <sys/time.h>
-
-// External constants initialized in main.c
-// Rendering, display, texture loading
-extern SDL_Window* window;
-extern SDL_Renderer* renderer;
-SDL_Texture* loadTexture(const char* path);
 
 typedef struct Sprite
 {

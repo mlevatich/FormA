@@ -1,4 +1,5 @@
 FormA
+NoSDL
 *.log
 *.o
 .DS_Store
