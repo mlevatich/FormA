@@ -3,6 +3,8 @@ Spoof of the interface to SDL2/SDL.h needed for FormA, so that we can model
 check the game independently of SDL.
 */
 
+#include <stdlib.h>
+
 // Values never used
 enum {
     SDL_INIT_VIDEO, SDL_INIT_AUDIO,
