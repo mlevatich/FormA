@@ -3,6 +3,7 @@
 
 #ifdef USE_SDL
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #endif // USE_SDL
 #ifndef USE_SDL
 #include "mockSDL.h"

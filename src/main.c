@@ -3,14 +3,15 @@
 #include "../headers/asteroid.h"
 #include <assert.h>
 
-// Window and renderer
+// Window, renderer, font
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+TTF_Font* font = NULL;
 
 // Game state is captured by this data structure
 typedef struct State
 {
-	long score;
+	long long score;
     Sprite* ship;
 	Asteroid* asteroids; // linked list of asteroids
 }
@@ -140,6 +141,10 @@ bool loadGame(State* st)
     // Initialize renderer color and image loading
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
+	// Font library
+	TTF_Init();
+	font = TTF_OpenFont("graphics/basis33.ttf", 24);
+
     // True random seed
     struct timeval tm;
     gettimeofday(&tm, NULL);
@@ -149,6 +154,7 @@ bool loadGame(State* st)
     double c_x = (double) (SCREEN_WIDTH - ship_w) / 2;
     double c_y = (double) (SCREEN_HEIGHT - ship_h) / 2;
     st->ship = loadSprite(true, ship_w, ship_h, c_x, c_y, "graphics/ship.bmp");
+	st->score = 0;
 
     // "seed" the linked list with one asteroid - we don't want it to be empty.
     st->asteroids = NULL;
@@ -364,6 +370,7 @@ bool updateGame(State* st, const Uint8* keys)
     // Each frame, a new asteroid might spawn
     checkSpawnAsteroid(st);
 
+	st->score++;
 	return false;
 }
 
@@ -376,6 +383,20 @@ void renderSprite(const Sprite* s)
     SDL_RenderCopyEx(renderer, s->t, &src, &dst, rot, NULL, SDL_FLIP_NONE);
 }
 
+// Render the current score
+void renderScore(long long score)
+{
+	char score_str[100];
+	sprintf(score_str, "Score: %010llu", score);
+	SDL_Color white = { 255, 255, 255 };
+	SDL_Surface* sMsg = TTF_RenderText_Solid(font, score_str, white);
+	SDL_Texture* tMsg = SDL_CreateTextureFromSurface(renderer, sMsg);
+	SDL_Rect rMsg = { 20, 20, 200, 24 };
+	SDL_RenderCopy(renderer, tMsg, NULL, &rMsg);
+	SDL_FreeSurface(sMsg);
+	SDL_DestroyTexture(tMsg);
+}
+
 // Render the entire game state each frame
 void renderGame(const State* st)
 {
@@ -384,6 +405,9 @@ void renderGame(const State* st)
 
     // Asteroids
     for(Asteroid* a = st->asteroids; a; a = a->next) renderSprite(a->sprite);
+
+	// Score
+	renderScore(st->score);
 }
 
 int main(int argc, char** argv)
@@ -460,6 +484,7 @@ int main(int argc, char** argv)
     }
 
     // Free all resources and exit game
+	printf("Final score: %llu\n", st.score);
     quitGame(&st);
     return 0;
 }

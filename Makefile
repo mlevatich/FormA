@@ -1,7 +1,7 @@
 CC        = gcc
 CFLAGS    = -g3 -std=c99 -pedantic -Wall
 USE_SDL   = -D USE_SDL
-LIBS      = -lSDL2 -lSDL2_mixer -lm
+LIBS      = -lSDL2 -lSDL2_mixer -lSDL2_ttf -lm
 NOSDL_OBJ = main-nosdl.o
 OBJ       = main.o
 SRC       = src
