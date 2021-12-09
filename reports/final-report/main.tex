@@ -17,6 +17,7 @@
 \newcommand{\LTLeventually}{\Diamond}
 \newcommand{\LTLnext}{\bigcirc}
 \newcommand{\Name}{\textit{FormA}\xspace}
+\newcommand{\cbmc}{\texttt{CBMC}}
 
 \title{COMS 6863 Final Project Status Report: \Name{}}
 \author{Max Levatich \& Wonhyuk (Harry) Choi}
@@ -135,6 +136,9 @@
 			AG((asteroid.x < 0 \lor end < asteroid.x) \land 
 			(asteroid.y < 0 \lor end < asteroid.y))
 		\end{align*}
+    
+    \subsection{Asteroids Always Exist}
+    \[AG(asteroids != NULL)\]
 
 \section{Verification Approach}
 
@@ -153,25 +157,23 @@
 	We plan to integrate CBMC as a developmental procedure, just like regression testing might be used in a software development cycle.
 	Creating the assertions themselves will help with the design process, and model checking will show that we have the correct implementation with respect to the specification.
 
-\section{Project Progress}
-So far, we have created the basics of our game, as shown in Figure~\ref{fig:gameplay}.
-The game involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
-
+\subsection{Comparison with \texttt{clang-tidy}}
+We also employed the tool \texttt{clang-tidy} to catch possible bugs through static analysis.
+Most notably, it was able to show a null pointer dereference that we had in our code (Figure~\ref{fig:clang-tidy})
 \begin{figure}[!h]
-    \includegraphics[width=\linewidth]{gameplay.png}
-    \caption{Screenshot of \Name}
-    \label{fig:gameplay}
+    \includegraphics[width=\linewidth]{clang-tidy.png}
+    \caption{Using \texttt{clang-tidy}}
+    \label{fig:clang-tidy}
 \end{figure}
 
-However, we are currently struggling with applying \texttt{CBMC} to our project.
-Our game relies on the use of the \texttt{SDL} library, but the library does not work well with \texttt{CBMC}.
-A simple file \texttt{main.c} such as 
+\subsection{Using \cbmc}
+In order to use \cbmc, we were forced to de-couple the implementation of our game with its graphical implementation.
+When we try to invoke \cbmc on the \texttt{SDL} library, even with the simplest code listing as below:
 \begin{verbatim}
 #include<SDL2/SDL.h>
 int main(){}
 \end{verbatim}
-results in the following error in Figure~\ref{fig:cbmc-sdl}, even though the code runs properly.
-This behavior is consistent whether we use \texttt{cbmc} or \texttt{goto-cc}, and whether we use the \texttt{--no-library} option.
+results in an error as shown in Figure~\ref{fig:cbmc-sdl}, even though the code runs properly.
 
 \begin{figure}[!h]
     \includegraphics[width=\linewidth]{cbmc-sdl.png}
@@ -179,7 +181,23 @@ This behavior is consistent whether we use \texttt{cbmc} or \texttt{goto-cc}, an
     \label{fig:cbmc-sdl}
 \end{figure}
 
-Our current idea is to decouple our codebase from SDL, so that we can check it without SDL, pending any advice or suggestions from the instructors.
+We decided to create a mock interface that has the same definitions of the library, without its implementations,
+since we were not interested in checking the correctness of the \texttt{SDL} library.
+
+\section{Completed Project}
+The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
+
+\begin{figure}[!h]
+    \includegraphics[width=\linewidth]{gameplay.png}
+    \caption{Screenshot of \Name}
+    \label{fig:gameplay}
+\end{figure}
+
+\section{Lessons Learned}
+
+\section{Teamwork}
+Both members of the team contributed equally to the project,
+including the coding of the game, preparing for/using CBMC, and writing report documents.
 
 \bibliographystyle{IEEEtran}
 \bibliography{proposal}
