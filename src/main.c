@@ -290,7 +290,7 @@ void checkSpawnAsteroid(State* st)
 {
 
 #ifdef CBMC
-	__CPROVER_precondition(st->asteroids != NULL);
+	__CPROVER_precondition(st->asteroids != NULL, "");
 #endif //CBMC
 
     // Controls how many asteroids are on screen
@@ -312,7 +312,7 @@ void checkSpawnAsteroid(State* st)
 
 #ifdef CBMC
 	// There should still be asteroids after the fact
-	__CPROVER_postcondition(st->asteroids != NULL);
+	__CPROVER_postcondition(st->asteroids != NULL, "There should still be asteroids");
 #endif //CBMC
 }
 
