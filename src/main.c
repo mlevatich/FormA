@@ -197,31 +197,22 @@ void handleKeypress(State* st, int key)
 
 }
 
+bool detectSpriteCollision(const Sprite* s1, const Sprite* s2)
+{
+	bool left  = s2->x + s2->w < s1->x;
+	bool right = s1->x + s1->w < s2->x;
+	bool below = s1->y + s1->h < s2->y;
+	bool above = s2->y + s2->h < s1->y;
+	return !(left || right || below || above);
+}
+
 // TODO: Is this the proper way to handle collision?
 // Feel free to delete & replace code as needed.
-bool planeCollided(const State* st)
+bool detectShipAsteroidCollision(const State* st)
 {
-	Sprite* ship = st->ship;
-	double shipLeft = ship->x - (double) ship->w / 2;
-	double shipRight = ship->x + (double) ship->w / 2;
-	double shipTop = ship->y + (double) ship->h / 2;
-	double shipBot = ship->y - (double) ship->h / 2;
-
-    for (Asteroid* a = st->asteroids; a != NULL; a = a->next) {
-        Sprite* s = a->sprite;
-		double astLeft = s->x - (double) s->w / 2;
-		double astRight = s->x + (double) s->w / 2;
-		double astTop = s->y + (double) s->h / 2;
-		double astBot = s->y - (double) s->h / 2;
-
-		bool leftOfShip = astRight < shipLeft;
-		bool rightOfShip = shipRight < astLeft;
-		bool belowShip = astTop < shipBot;
-		bool aboveShip = shipTop < astBot;
-		if (!(leftOfShip || rightOfShip || belowShip || aboveShip))
-			return true;
+    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+        if(detectSpriteCollision(st->ship, a->sprite)) return true;
     }
-
 	return false;
 }
 
@@ -355,7 +346,7 @@ void checkDespawnAsteroids(State* st)
 }
 
 // Use keyboard state to update the game state
-void updateGame(State* st, const Uint8* keys)
+bool updateGame(State* st, const Uint8* keys)
 {
     // Ship moves
     moveShip(st, keys);
@@ -364,10 +355,7 @@ void updateGame(State* st, const Uint8* keys)
     moveAsteroids(st);
 
     // Is ship colliding with any asteroids?
-	if (planeCollided(st)) {
-		// TODO: send gameOver signal
-		printf("%s", "placeholder collision statement");
-	}
+	if(detectShipAsteroidCollision(st)) return true;
 
     // When an asteroid goes off screen,
     // it is despawned to make room for more
@@ -375,6 +363,8 @@ void updateGame(State* st, const Uint8* keys)
 
     // Each frame, a new asteroid might spawn
     checkSpawnAsteroid(st);
+
+	return false;
 }
 
 // Render a single sprite
@@ -398,7 +388,6 @@ void renderGame(const State* st)
 
 int main(int argc, char** argv)
 {
-
     // Parse command line arguments
     if(argc > 1)
     {
@@ -457,7 +446,7 @@ int main(int argc, char** argv)
         // Update the game state for this frame, based on current game state
         // and current keyboard state
         const Uint8* keys = SDL_GetKeyboardState(NULL);
-        updateGame(&st, keys);
+        if(updateGame(&st, keys)) break;
 
         // Render changes to screen based on current game state
         SDL_RenderClear(renderer);
