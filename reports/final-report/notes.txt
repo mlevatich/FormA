@@ -1,0 +1,6 @@
+* Add screenshot of where clang-tidy helped
+* Our code depends on a lot of for loops
+	--> asteroids, game loop
+	--> difficult to increase size of program
+* Getting good proof assertions is hard
+* Challenges: decoupling implementation of SDL from codebase (done with some macros)

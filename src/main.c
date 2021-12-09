@@ -113,6 +113,10 @@ void ensureAsteroids(State* st)
         st->asteroids->prev = NULL;
         st->asteroids->sprite = spawnAsteroid();
     }
+#ifdef CBMC
+	__CPROVER_assert(st->asteroids != NULL, "There should always be asteroids");
+#endif // CBMC
+
 }
 
 // Load SDL and initialize the window, renderer, audio, and data
@@ -193,13 +197,31 @@ void handleKeypress(State* st, int key)
 
 }
 
+// TODO: Is this the proper way to handle collision?
+// Feel free to delete & replace code as needed.
 bool planeCollided(const State* st)
 {
-	Asteroid* asteroid = st->asteroids;
-	while (asteroid != NULL) {
-		// TODO: collision logic
-		asteroid  = asteroid->next;
-	}
+	Sprite* ship = st->ship;
+	double shipLeft = ship->x - (double) ship->w / 2;
+	double shipRight = ship->x + (double) ship->w / 2;
+	double shipTop = ship->y + (double) ship->h / 2;
+	double shipBot = ship->y - (double) ship->h / 2;
+
+    for (Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+        Sprite* s = a->sprite;
+		double astLeft = s->x - (double) s->w / 2;
+		double astRight = s->x + (double) s->w / 2;
+		double astTop = s->y + (double) s->h / 2;
+		double astBot = s->y - (double) s->h / 2;
+
+		bool leftOfShip = astRight < shipLeft;
+		bool rightOfShip = shipRight < astLeft;
+		bool belowShip = astTop < shipBot;
+		bool aboveShip = shipTop < astBot;
+		if (!(leftOfShip || rightOfShip || belowShip || aboveShip))
+			return true;
+    }
+
 	return false;
 }
 
@@ -241,6 +263,12 @@ void moveShip(State* st, const Uint8* keys)
     if(s->y > SCREEN_HEIGHT) s->y = 0 - s->h;
     if(s->x < 0 - s->w)      s->x = SCREEN_WIDTH;
     if(s->y < 0 - s->h)      s->y = SCREEN_HEIGHT;
+
+#ifdef CBMC
+	bool xOutOfBounds = 0 < s->x || SCREEN_WIDTH < s->x;
+	bool yOutOfBounds = 0 < s->y || SCREEN_HEIGHT < s->y;
+	__CPROVER_assert(!(xOutOfBounds || yOutOfBounds), "OOB");
+#endif // CBMC
 }
 
 // Move the asteroids through space according to "laws" of physics each frame
@@ -260,6 +288,11 @@ void moveAsteroids(State* st)
 // if there are less than the maximum number of asteroids out already
 void checkSpawnAsteroid(State* st)
 {
+
+#ifdef CBMC
+	__CPROVER_precondition(st->asteroids != NULL);
+#endif //CBMC
+
     // Controls how many asteroids are on screen
     double spawn_chance = 0.05;
     int max_asteroids = 12;
@@ -276,6 +309,11 @@ void checkSpawnAsteroid(State* st)
         a->next->prev = a;
         a->next->sprite = spawnAsteroid();
     }
+
+#ifdef CBMC
+	// There should still be asteroids after the fact
+	__CPROVER_postcondition(st->asteroids != NULL);
+#endif //CBMC
 }
 
 // Handles garbage collection of asteroids after they've left the screen
@@ -307,6 +345,10 @@ void checkDespawnAsteroids(State* st)
         }
     }
 
+// TODO: Check asteroids are all out of bounds
+#ifdef CBMC
+#endif // CBMC
+
     // If there are no asteroids left, force one to spawn
     // (linked list should never be empty)
     ensureAsteroids(st);
@@ -324,6 +366,7 @@ void updateGame(State* st, const Uint8* keys)
     // Is ship colliding with any asteroids?
 	if (planeCollided(st)) {
 		// TODO: send gameOver signal
+		printf("%s", "placeholder collision statement");
 	}
 
     // When an asteroid goes off screen,
@@ -355,7 +398,6 @@ void renderGame(const State* st)
 
 int main(int argc, char** argv)
 {
-	// __CPROVER_assume(0 < 11);
 
     // Parse command line arguments
     if(argc > 1)
