@@ -13,7 +13,8 @@ typedef struct State
 {
 	long long score;
     Sprite* ship;
-	Asteroid* asteroids; // linked list of asteroids
+	int laser_cooldown;
+	SpriteList* sprites; // linked list of active sprites
 }
 State;
 
@@ -31,9 +32,10 @@ SDL_Texture* loadTexture(const char* path)
 }
 
 // Load new sprite into the game
-Sprite* loadSprite(bool a, int w, int h, double x, double y, const char* path)
+Sprite* loadSprite(int id, int w, int h, double x, double y, const char* path)
 {
     Sprite* s = malloc(sizeof(Sprite));
+	s->id = id;
     s->t = loadTexture(path);
     s->w = w;
     s->h = h;
@@ -51,8 +53,8 @@ Sprite* loadSprite(bool a, int w, int h, double x, double y, const char* path)
 Sprite* spawnAsteroid()
 {
     // Width and height of the asteroid
-    int ast_w = 92;
-    int ast_h = 89;
+    int a_w = 92;
+    int a_h = 89;
 
     // Weight the chances towards spawning an asteroid on the longer edge, to
     // even out the distribution of where they appear across the perimeter
@@ -68,14 +70,14 @@ Sprite* spawnAsteroid()
     // From the top of the screen, with downward velocity
     double where = getRand();
     if(where < weighted_chance / 2) {
-        x = getRand() * (SCREEN_WIDTH - ast_w);
-        y = 0 - ast_h;
+        x = getRand() * (SCREEN_WIDTH - a_w);
+        y = 0 - a_h;
         dx /= 2;
     }
 
     // From the bottom of the screen, with upward velocity
     else if(where < weighted_chance) {
-        x = getRand() * (SCREEN_WIDTH - ast_w);
+        x = getRand() * (SCREEN_WIDTH - a_w);
         y = SCREEN_HEIGHT;
         dx /= 2;
         dy *= -1;
@@ -83,21 +85,21 @@ Sprite* spawnAsteroid()
 
     // From the left of the screen, with rightward velocity
     else if(where < weighted_chance + (1 - weighted_chance) / 2) {
-        y = getRand() * (SCREEN_HEIGHT - ast_h);
-        x = 0 - ast_w;
+        y = getRand() * (SCREEN_HEIGHT - a_h);
+        x = 0 - a_w;
         dy /= 2;
     }
 
     // From the right of the screen, with leftward velofity
     else {
-        y = getRand() * (SCREEN_HEIGHT - ast_h);
+        y = getRand() * (SCREEN_HEIGHT - a_h);
         x = SCREEN_WIDTH;
         dy /= 2;
         dx *= -1;
     }
 
     // Load the sprite with the computed parameters
-    Sprite* a = loadSprite(true, ast_w, ast_h, x, y, "graphics/asteroid.bmp");
+	Sprite* a = loadSprite(ASTER, a_w, a_h, x, y, "graphics/asteroid.bmp");
     a->dx = dx;
     a->dy = dy;
     a->omega = getRand() * 0.1 - 0.05;
@@ -108,14 +110,14 @@ Sprite* spawnAsteroid()
 // sure there is never an empty linked list.
 void ensureAsteroids(State* st)
 {
-    if(!st->asteroids) {
-        st->asteroids = malloc(sizeof(Asteroid));
-        st->asteroids->next = NULL;
-        st->asteroids->prev = NULL;
-        st->asteroids->sprite = spawnAsteroid();
+    if(!st->sprites) {
+        st->sprites = malloc(sizeof(SpriteList));
+        st->sprites->next = NULL;
+        st->sprites->prev = NULL;
+        st->sprites->sprite = spawnAsteroid();
     }
 #ifdef CBMC
-	__CPROVER_assert(st->asteroids != NULL, "There should always be asteroids");
+	__CPROVER_assert(st->sprites != NULL, "There should always be asteroids");
 #endif // CBMC
 
 }
@@ -153,11 +155,11 @@ bool loadGame(State* st)
     // Initial state
     double c_x = (double) (SCREEN_WIDTH - ship_w) / 2;
     double c_y = (double) (SCREEN_HEIGHT - ship_h) / 2;
-    st->ship = loadSprite(true, ship_w, ship_h, c_x, c_y, "graphics/ship.bmp");
+    st->ship = loadSprite(SHIP, ship_w, ship_h, c_x, c_y, "graphics/ship.bmp");
 	st->score = 0;
 
     // "seed" the linked list with one asteroid - we don't want it to be empty.
-    st->asteroids = NULL;
+    st->sprites = NULL;
     ensureAsteroids(st);
 
     return true;
@@ -171,11 +173,11 @@ void unloadSprite(Sprite* s)
 }
 
 // Destroy asteroid linked list
-void unloadAsteroids(Asteroid* a)
+void unloadSprites(SpriteList* a)
 {
     while(a) {
         unloadSprite(a->sprite);
-        Asteroid* p = a;
+        SpriteList* p = a;
         a = a->next;
         free(p);
     }
@@ -190,7 +192,7 @@ void quitGame(State* st)
 
     // Free state
     unloadSprite(st->ship);
-    unloadAsteroids(st->asteroids);
+    unloadSprites(st->sprites);
 
     // Free SDL
     SDL_Quit();
@@ -203,7 +205,7 @@ void handleKeypress(State* st, int key)
 
 }
 
-bool detectSpriteCollision(const Sprite* s1, const Sprite* s2)
+bool colliding(const Sprite* s1, const Sprite* s2)
 {
 	bool left  = s2->x + s2->w < s1->x;
 	bool right = s1->x + s1->w < s2->x;
@@ -212,12 +214,34 @@ bool detectSpriteCollision(const Sprite* s1, const Sprite* s2)
 	return !(left || right || below || above);
 }
 
-// TODO: Is this the proper way to handle collision?
-// Feel free to delete & replace code as needed.
-bool detectShipAsteroidCollision(const State* st)
+bool isLaser(const Sprite* s)
 {
-    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
-        if(detectSpriteCollision(st->ship, a->sprite)) return true;
+	return s->id == LASER;
+}
+
+bool isRock(const Sprite* s)
+{
+	return (s->id == ASTER || s->id == FRAGMENT);
+}
+
+bool detectAllCollisions(const State* st)
+{
+    for(SpriteList* a = st->sprites; a != NULL; a = a->next) {
+
+		Sprite* s1 = a->sprite;
+		for(SpriteList* b = a->next; b != NULL; b = b->next) {
+
+			Sprite* s2 = b->sprite;
+			if(isRock(s1) && isRock(s2) && colliding(s1, s2)) {
+			    // Resolve rock-rock collision
+			}
+			if(((isRock(s1) && isLaser(s2)) || (isLaser(s1) && isRock(s2))) && colliding(s1, s2)) {
+				// Resolve rock-laser collision
+			}
+		}
+
+		// Resolve rock-ship collision
+        if(isRock(s1) && colliding(st->ship, s1)) return true;
     }
 	return false;
 }
@@ -271,9 +295,9 @@ void moveShip(State* st, const Uint8* keys)
 // Move the asteroids through space according to "laws" of physics each frame
 // No forces are applied to asteroids, they just travel through space.
 // They don't wrap around the screen either.
-void moveAsteroids(State* st)
+void moveSprites(State* st)
 {
-    for(Asteroid* a = st->asteroids; a != NULL; a = a->next) {
+    for(SpriteList* a = st->sprites; a != NULL; a = a->next) {
         Sprite* s = a->sprite;
         s->x += s->dx;
         s->y += s->dy;
@@ -287,21 +311,22 @@ void checkSpawnAsteroid(State* st)
 {
 
 #ifdef CBMC
-	__CPROVER_precondition(st->asteroids != NULL, "");
+	__CPROVER_precondition(st->sprites != NULL, "");
 #endif //CBMC
 
     // Controls how many asteroids are on screen
     double spawn_chance = 0.05;
     int max_asteroids = 12;
 
-    // Jump to end of list, counting length along the way
-    int n = 1;
-    Asteroid* a = st->asteroids;
-    for(; a->next != NULL; a = a->next, n++);
+    // Jump to end of list, counting (whole) asteroids seen along the way
+    int n = 0;
+    SpriteList* a = st->sprites;
+    for(; a->next != NULL; a = a->next) if(a->sprite->id == ASTER) n++;
+	if(a->sprite->id == ASTER) n++;
 
     // If we're under capacity, chance to append new asteroid to list
     if(n < max_asteroids && getRand() < spawn_chance) {
-        a->next = malloc(sizeof(Asteroid));
+        a->next = malloc(sizeof(SpriteList));
         a->next->next = NULL;
         a->next->prev = a;
         a->next->sprite = spawnAsteroid();
@@ -309,21 +334,21 @@ void checkSpawnAsteroid(State* st)
 
 #ifdef CBMC
 	// There should still be asteroids after the fact
-	__CPROVER_postcondition(st->asteroids != NULL, "There should still be asteroids");
+	__CPROVER_postcondition(st->sprites != NULL, "There should still be asteroids");
 #endif //CBMC
 }
 
 // Handles garbage collection of asteroids after they've left the screen
-void checkDespawnAsteroids(State* st)
+void checkDespawnSprites(State* st)
 {
-    // How far off screen an asteroid should be before it is despawned
+    // How far off screen a sprite should be before it is despawned
     int radius = 100;
 
-    // Iterate over all asteroids
-    Asteroid* a = st->asteroids;
+    // Iterate over all sprites
+    SpriteList* a = st->sprites;
     while(a) {
 
-        // If the asteroid is off screen
+        // Check if the sprite is off screen
         Sprite* s = a->sprite;
         if(s->x > SCREEN_WIDTH  + radius || s->x + s->w < 0 - radius ||
            s->y > SCREEN_HEIGHT + radius || s->y + s->h < 0 - radius) {
@@ -331,9 +356,9 @@ void checkDespawnAsteroids(State* st)
             // If so, remove it from linked list and delete it
             if(a->next) a->next->prev = a->prev;
             if(a->prev) a->prev->next = a->next;
-            else        st->asteroids = a->next;
+            else        st->sprites = a->next;
             unloadSprite(s);
-            Asteroid* tmp = a;
+            SpriteList* tmp = a;
             a = a->next;
             free(tmp);
         }
@@ -351,25 +376,49 @@ void checkDespawnAsteroids(State* st)
     ensureAsteroids(st);
 }
 
+// TODO
+void fireLaser(Sprite* ship)
+{
+	// Get laser base position
+	// loadSprite
+	// Set velocity, theta
+	// Add to linked list of active sprites
+}
+
+void updateLasers(State* st, const Uint8* keys)
+{
+	if(st->laser_cooldown > 0) st->laser_cooldown--;
+	if(st->laser_cooldown == 0 && keys[SDL_SCANCODE_SPACE]) {
+		st->laser_cooldown = 50;
+		fireLaser(st->ship);
+	}
+}
+
 // Use keyboard state to update the game state
 bool updateGame(State* st, const Uint8* keys)
 {
     // Ship moves
     moveShip(st, keys);
 
-    // Asteroids move
-    moveAsteroids(st);
+    // Asteroids and lasers move
+    moveSprites(st);
 
-    // Is ship colliding with any asteroids?
-	if(detectShipAsteroidCollision(st)) return true;
+    // Collision detection and resolution
+	// Returns true if the ship hit an asteroid
+	if(detectAllCollisions(st)) return true;
 
-    // When an asteroid goes off screen,
-    // it is despawned to make room for more
-    checkDespawnAsteroids(st);
+	// Laser cooldown, check if player wants to fire a laser
+	updateLasers(st, keys);
+
+    // When a sprite goes off screen, it is despawned
+    checkDespawnSprites(st);
 
     // Each frame, a new asteroid might spawn
     checkSpawnAsteroid(st);
 
+	// Score goes up by 1 per frame
+	// TODO: increase max asteroids and
+	// decrease laser cooldown as score goes up
 	st->score++;
 	return false;
 }
@@ -403,8 +452,8 @@ void renderGame(const State* st)
     // Ship
     renderSprite(st->ship);
 
-    // Asteroids
-    for(Asteroid* a = st->asteroids; a; a = a->next) renderSprite(a->sprite);
+    // Sprites
+    for(SpriteList* a = st->sprites; a; a = a->next) renderSprite(a->sprite);
 
 	// Score
 	renderScore(st->score);
@@ -452,20 +501,9 @@ int main(int argc, char** argv)
         // Track how long this frame takes
         int start_time = SDL_GetTicks();
 
-        // Process any SDL events that have happened since last frame
+        // Check if the player quit the game
         SDL_Event e;
-        while(SDL_PollEvent(&e) != 0)
-        {
-            // No need to process further events if an exit signal was received
-            if(e.type == SDL_QUIT) quit = true;
-
-            // Process key presses
-            if(e.type == SDL_KEYDOWN)
-            {
-                int key = e.key.keysym.sym;
-                handleKeypress(&st, key);
-            }
-        }
+        while(SDL_PollEvent(&e) != 0) if(e.type == SDL_QUIT) quit = true;
 
         // Update the game state for this frame, based on current game state
         // and current keyboard state

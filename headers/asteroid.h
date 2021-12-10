@@ -3,12 +3,12 @@
 
 #include "forma.h"
 
-struct Asteroid
+struct SpriteList
 {
-	struct Asteroid* prev;
-	struct Asteroid* next;
+	struct SpriteList* prev;
+	struct SpriteList* next;
 	Sprite* sprite;
 };
-typedef struct Asteroid Asteroid;
+typedef struct SpriteList SpriteList;
 
 #endif // ASTEROID

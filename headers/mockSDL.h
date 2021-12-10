@@ -16,6 +16,7 @@ enum {
 #define SDL_SCANCODE_UP    0
 #define SDL_SCANCODE_LEFT  1
 #define SDL_SCANCODE_RIGHT 1
+#define SDL_SCANCODE_SPACE 2
 
 // Only passed as pointers, never dereferenced; type could be anything
 typedef int SDL_Window;
@@ -34,8 +35,8 @@ typedef struct SDL_Rect { int x; int y; int w; int h; } SDL_Rect;
 typedef struct SDL_Color { int r; int g; int b; } SDL_Color;
 
 // The "keyboard" that the SDL_SCANCODEs index into.
-// These settings cause the ship to accelerate forward but not turn
-static Uint8 spoofKeystate[2] = { 1, 0 };
+// These settings cause the ship to accelerate forward and shoot, but not turn
+static Uint8 spoofKeystate[3] = { 1, 0, 1 };
 
 // 0 indicates success
 static inline int           SDL_Init(int a)                                                     { return 0; }

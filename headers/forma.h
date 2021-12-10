@@ -17,6 +17,7 @@
 
 typedef struct Sprite
 {
+    int id;
     SDL_Texture* t;
     int w;
     int h;
