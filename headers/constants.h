@@ -19,6 +19,32 @@
 	#define M_PI_2 (M_PI / 2)
 #endif // M_PI_2
 
+// Audio-related constants
+#define SAMPLE_RATE 44100
+#define NUM_CHANNELS 2
+#define CHUNK_SIZE 2048
+#define NUM_SFX 2
+
+// List of sound effects
+enum sound_effects
+{ SFX_LASER, SFX_CRASH };
+
+// Mute the game's audio
+void setMute(void);
+
+// Start the game's main theme
+void startMusic(void);
+
+// Play a sound effect
+void playSoundEffect(int sfx_id);
+
+// Load audio elements
+void loadSound(void);
+
+// Free audio elements
+void freeSound(void);
+
+
 // Sprite ids
 enum sprite_ids
 { ASTER, FRAGMENT, LASER, SHIP };

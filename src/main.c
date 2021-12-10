@@ -7,6 +7,8 @@
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 TTF_Font* font = NULL;
+Mix_Music* music = NULL;
+Mix_Chunk** sfx = NULL;
 
 // Game state is captured by this data structure
 typedef struct State
@@ -29,6 +31,13 @@ SDL_Texture* loadTexture(const char* path)
     newTexture = SDL_CreateTextureFromSurface(renderer, loaded);
     SDL_FreeSurface(loaded);
     return newTexture;
+}
+
+// Play a sound effect
+void playSfx(int sfx_id)
+{
+    int ch = Mix_PlayChannel(-1, sfx[sfx_id], 0);
+	Mix_ExpireChannel(ch, 1000);
 }
 
 // Load new sprite into the game
@@ -151,6 +160,11 @@ bool loadGame(State* st)
     int ship_w = 20;
     int ship_h = 20;
 
+	// True random seed
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    srand(tm.tv_sec + tm.tv_usec * 1000000ul);
+
     // Initialize SDL
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) return false;
 
@@ -169,10 +183,22 @@ bool loadGame(State* st)
 	TTF_Init();
 	font = TTF_OpenFont("graphics/basis33.ttf", 24);
 
-    // True random seed
-    struct timeval tm;
-    gettimeofday(&tm, NULL);
-    srand(tm.tv_sec + tm.tv_usec * 1000000ul);
+	// Initialize audio
+    Mix_OpenAudio(SAMPLE_RATE, MIX_DEFAULT_FORMAT, NUM_CHANNELS, CHUNK_SIZE);
+
+    // Load music and set volume
+	double track_select = getRand();
+	if(track_select < 0.5) music = Mix_LoadMUS("audio/bg1.wav");
+	else                   music = Mix_LoadMUS("audio/bg2.wav");
+	Mix_VolumeMusic(100);
+	Mix_PlayMusic(music, -1);
+
+    // Make space for sound effect list
+    sfx = (Mix_Chunk**) malloc(sizeof(Mix_Chunk*) * NUM_SFX);
+
+    // Menu navigation noises
+    sfx[SFX_LASER] = Mix_LoadWAV("audio/laser.wav");
+    sfx[SFX_CRASH] = Mix_LoadWAV("audio/crash.wav");
 
     // Initial state
     double c_x = (double) (SCREEN_WIDTH - ship_w) / 2;
@@ -225,6 +251,16 @@ void quitGame(State* st)
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
+	// Free font elements
+	TTF_CloseFont(font);
+	TTF_Quit();
+
+	// Free audio elements
+	Mix_FreeMusic(music);
+	for(int i = 0; i < NUM_SFX; i++) Mix_FreeChunk(sfx[i]);
+    free(sfx);
+	Mix_Quit();
+
     // Free state
     unloadSprite(st->ship);
     unloadSprites(st->sprites);
@@ -274,6 +310,7 @@ bool detectAllCollisions(State* st)
 			  && colliding(s1, s2) && !delete[i] && !delete[j]) {
 		        delete[i] = true;
 				delete[j] = true;
+				playSfx(SFX_CRASH);
 				st->score += 50;
 			}
 		}
@@ -442,6 +479,9 @@ void fireLaser(State* st)
 
 	// Add laser to head of linked list of active sprites
 	addSprite(st, lz);
+
+	// Laser sound effect
+	playSfx(SFX_LASER);
 }
 
 void updateLasers(State* st, const Uint8* keys)
