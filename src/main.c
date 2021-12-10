@@ -227,21 +227,23 @@ bool isRock(const Sprite* s)
 bool detectAllCollisions(const State* st)
 {
     for(SpriteList* a = st->sprites; a != NULL; a = a->next) {
-
 		Sprite* s1 = a->sprite;
 		for(SpriteList* b = a->next; b != NULL; b = b->next) {
-
 			Sprite* s2 = b->sprite;
+
+			// Rock-rock collisions break both
 			if(isRock(s1) && isRock(s2) && colliding(s1, s2)) {
-			    // Resolve rock-rock collision
+
 			}
+
+			// Rock-laser collisions break the rock and delete the laser
 			if(((isRock(s1) && isLaser(s2)) || (isLaser(s1) && isRock(s2)))
 			  && colliding(s1, s2)) {
-				// Resolve rock-laser collision
+
 			}
 		}
 
-		// Resolve rock-ship collision
+		// Rock-ship collisions end the game
         if(isRock(s1) && colliding(st->ship, s1)) return true;
     }
 	return false;
@@ -470,6 +472,22 @@ void renderScore(long long score)
 	SDL_DestroyTexture(tMsg);
 }
 
+// Render a bar representing the cooldown of the laser
+void renderCooldown(int cd)
+{
+	SDL_Texture* line = loadTexture("graphics/laser.bmp");
+	int w = 2;
+	int h = 12;
+	int y = 50;
+	for(int i = 0; i < cd; i++) {
+		int x = 20 + i;
+		SDL_Rect src = { 0, 0, w, h };
+	    SDL_Rect dst = { x, y, w, h };
+	    SDL_RenderCopyEx(renderer, line, &src, &dst, 180, NULL, SDL_FLIP_NONE);
+	}
+	SDL_DestroyTexture(line);
+}
+
 // Render the entire game state each frame
 void renderGame(const State* st)
 {
@@ -481,6 +499,9 @@ void renderGame(const State* st)
 
 	// Score
 	renderScore(st->score);
+
+	// Laser cooldown bar
+	renderCooldown(st->laser_cooldown);
 }
 
 int main(int argc, char** argv)
