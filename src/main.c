@@ -235,7 +235,8 @@ bool detectAllCollisions(const State* st)
 			if(isRock(s1) && isRock(s2) && colliding(s1, s2)) {
 			    // Resolve rock-rock collision
 			}
-			if(((isRock(s1) && isLaser(s2)) || (isLaser(s1) && isRock(s2))) && colliding(s1, s2)) {
+			if(((isRock(s1) && isLaser(s2)) || (isLaser(s1) && isRock(s2)))
+			  && colliding(s1, s2)) {
 				// Resolve rock-laser collision
 			}
 		}
@@ -334,7 +335,7 @@ void checkSpawnAsteroid(State* st)
 
 #ifdef CBMC
 	// There should still be asteroids after the fact
-	__CPROVER_postcondition(st->sprites != NULL, "There should still be asteroids");
+	__CPROVER_postcondition(st->sprites != NULL, "Must be > 0 asteroids");
 #endif //CBMC
 }
 
@@ -371,18 +372,41 @@ void checkDespawnSprites(State* st)
 #ifdef CBMC
 #endif // CBMC
 
-    // If there are no asteroids left, force one to spawn
+    // If there are no sprites left, force an asteroid to spawn
     // (linked list should never be empty)
     ensureAsteroids(st);
 }
 
-// TODO
-void fireLaser(Sprite* ship)
+void fireLaser(State* st)
 {
-	// Get laser base position
-	// loadSprite
-	// Set velocity, theta
-	// Add to linked list of active sprites
+	// Laser data. Velocity is at least 4, but in general is a little higher
+	// than the ship's velocity, so the ship can never outrun its own lasers
+	Sprite* ship = st->ship;
+	int l_w = 2;
+	int l_h = 12;
+	int l_v = max(4, 2 + sqrt(ship->dx * ship->dx + ship->dy * ship->dy));
+
+	// Stupid bullshit to line up the position of the (rotated) laser with the
+	// (rotated) nose of the ship. Don't ask how I derived this.
+	int w = ship->w;
+	int h = ship->h;
+	double t = ship->theta;
+	int l_x = ship->x + (w * (1 + cos(t)) + l_h * sin(t + M_PI_2)) / 2;
+	int l_y = ship->y + (h - w * sin(t) - l_h * (1 - cos(t + M_PI_2))) / 2;
+
+	// Spawn laser and set its direction and velocity
+	Sprite* lz = loadSprite(LASER, l_w, l_h, l_x, l_y, "graphics/laser.bmp");
+	lz->theta = t + M_PI_2;
+	lz->dx = l_v *  cos(t);
+	lz->dy = l_v * -sin(t);
+
+	// Add laser to head of linked list of active sprites
+	SpriteList* head = malloc(sizeof(SpriteList));
+	head->prev = NULL;
+	head->next = st->sprites;
+	head->sprite = lz;
+	st->sprites->prev = head;
+	st->sprites = head;
 }
 
 void updateLasers(State* st, const Uint8* keys)
@@ -390,7 +414,7 @@ void updateLasers(State* st, const Uint8* keys)
 	if(st->laser_cooldown > 0) st->laser_cooldown--;
 	if(st->laser_cooldown == 0 && keys[SDL_SCANCODE_SPACE]) {
 		st->laser_cooldown = 50;
-		fireLaser(st->ship);
+		fireLaser(st);
 	}
 }
 

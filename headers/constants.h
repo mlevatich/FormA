@@ -26,4 +26,8 @@ enum sprite_ids
 // Get random number in [0, 1)
 static inline double getRand() { return (double) rand() / (double) RAND_MAX; }
 
+// Max and min
+static inline double max(double a, double b) { if(a > b) return a; return b; }
+static inline double min(double a, double b) { if(a < b) return a; return b; }
+
 #endif // CONSTANTS
