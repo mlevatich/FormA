@@ -172,6 +172,19 @@ void unloadSprite(Sprite* s)
     free(s);
 }
 
+// Remove a sprite at the given position in
+// the linked list, and return the next element in the linked list
+SpriteList* unloadSpriteInPlace(State* st, SpriteList* a)
+{
+	if(a->next) a->next->prev = a->prev;
+	if(a->prev) a->prev->next = a->next;
+	else        st->sprites = a->next;
+	unloadSprite(a->sprite);
+	SpriteList* next = a->next;
+	free(a);
+	return next;
+}
+
 // Destroy asteroid linked list
 void unloadSprites(SpriteList* a)
 {
@@ -224,28 +237,45 @@ bool isRock(const Sprite* s)
 	return (s->id == ASTER || s->id == FRAGMENT);
 }
 
-bool detectAllCollisions(const State* st)
+bool detectAllCollisions(State* st)
 {
-    for(SpriteList* a = st->sprites; a != NULL; a = a->next) {
+	// Hash map of sprites marked for deletion
+	int len = 0;
+	for(SpriteList* a = st->sprites; a != NULL; a = a->next, len++);
+	bool* delete = calloc(len, sizeof(bool));
+
+	// Detect any collisions and mark sprites for deletion
+	int i = 0;
+    for(SpriteList* a = st->sprites; a != NULL; a = a->next, i++) {
 		Sprite* s1 = a->sprite;
-		for(SpriteList* b = a->next; b != NULL; b = b->next) {
+
+		// N^2 check
+		int j = i + 1;
+		for(SpriteList* b = a->next; b != NULL; b = b->next, j++) {
 			Sprite* s2 = b->sprite;
-
-			// Rock-rock collisions break both
-			if(isRock(s1) && isRock(s2) && colliding(s1, s2)) {
-
-			}
 
 			// Rock-laser collisions break the rock and delete the laser
 			if(((isRock(s1) && isLaser(s2)) || (isLaser(s1) && isRock(s2)))
 			  && colliding(s1, s2)) {
-
+		        delete[i] = true;
+				delete[j] = true;
 			}
 		}
 
 		// Rock-ship collisions end the game
-        if(isRock(s1) && colliding(st->ship, s1)) return true;
+        if(isRock(s1) && colliding(st->ship, s1)) {
+			free(delete);
+			return true;
+		}
     }
+
+	// Delete marked sprites and exit
+	int n = 0;
+	for(SpriteList* a = st->sprites; a != NULL; n++) {
+		if(delete[n]) a = unloadSpriteInPlace(st, a);
+		else          a = a->next;
+	}
+	free(delete);
 	return false;
 }
 
@@ -351,19 +381,11 @@ void checkDespawnSprites(State* st)
     SpriteList* a = st->sprites;
     while(a) {
 
-        // Check if the sprite is off screen
+        // Check if the sprite is off screen and remove it
         Sprite* s = a->sprite;
         if(s->x > SCREEN_WIDTH  + radius || s->x + s->w < 0 - radius ||
            s->y > SCREEN_HEIGHT + radius || s->y + s->h < 0 - radius) {
-
-            // If so, remove it from linked list and delete it
-            if(a->next) a->next->prev = a->prev;
-            if(a->prev) a->prev->next = a->next;
-            else        st->sprites = a->next;
-            unloadSprite(s);
-            SpriteList* tmp = a;
-            a = a->next;
-            free(tmp);
+			a = unloadSpriteInPlace(st, a);
         }
         else {
             a = a->next;
@@ -386,7 +408,7 @@ void fireLaser(State* st)
 	Sprite* ship = st->ship;
 	int l_w = 2;
 	int l_h = 12;
-	int l_v = max(4, 2 + sqrt(ship->dx * ship->dx + ship->dy * ship->dy));
+	int l_v = max(6, 2 + sqrt(ship->dx * ship->dx + ship->dy * ship->dy));
 
 	// Stupid bullshit to line up the position of the (rotated) laser with the
 	// (rotated) nose of the ship. Don't ask how I derived this.
