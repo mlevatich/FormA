@@ -48,13 +48,24 @@ Sprite* loadSprite(int id, int w, int h, double x, double y, const char* path)
     return s;
 }
 
+// Add a new sprite to the head of the linked list of sprites
+void addSprite(State* st, Sprite* s)
+{
+	SpriteList* head = malloc(sizeof(SpriteList));
+	head->prev = NULL;
+	head->next = st->sprites;
+	head->sprite = s;
+	if(st->sprites) st->sprites->prev = head;
+	st->sprites = head;
+}
+
 // Create a new asteroid at a random position off the edge of the screen,
 // with a random inward velocity
 Sprite* spawnAsteroid()
 {
     // Width and height of the asteroid
-    int a_w = 92;
-    int a_h = 89;
+    int a_w = 84;
+    int a_h = 83;
 
     // Weight the chances towards spawning an asteroid on the longer edge, to
     // even out the distribution of where they appear across the perimeter
@@ -106,16 +117,28 @@ Sprite* spawnAsteroid()
     return a;
 }
 
+void breakAsteroid(State* st, Sprite* a)
+{
+	int w = 45;
+	int h = 44;
+	for(int i = 0; i < 4; i++) {
+		int x = a->x + 2 + (a->w / 2 - 2) * (i >= 2);
+		int y = a->y + 2 + (a->h / 2 - 2) * (i > 0 && i < 3);
+		Sprite* f = loadSprite(FRAGMENT, w, h, x, y, "graphics/fragment.bmp");
+		f->dx = a->dx * (0.5 + getRand() * 0.2 - 0.1);
+		f->dy = a->dy * (0.5 + getRand() * 0.2 - 0.1);
+		f->theta = (i + getRand() * 0.4 - 0.2) * M_PI_2;
+		f->omega = a->omega * (0.5 + getRand() * 0.2 - 0.1);
+		addSprite(st, f);
+	}
+	st->score += 10;
+}
+
 // If the linked list is empty, creates it and inserts an asteroid, to make
 // sure there is never an empty linked list.
 void ensureAsteroids(State* st)
 {
-    if(!st->sprites) {
-        st->sprites = malloc(sizeof(SpriteList));
-        st->sprites->next = NULL;
-        st->sprites->prev = NULL;
-        st->sprites->sprite = spawnAsteroid();
-    }
+    if(!st->sprites) addSprite(st, spawnAsteroid());
 #ifdef CBMC
 	__CPROVER_assert(st->sprites != NULL, "There should always be asteroids");
 #endif // CBMC
@@ -211,19 +234,12 @@ void quitGame(State* st)
     SDL_Quit();
 }
 
-// Use keydown events to update the game state
-// TODO: What is this?
-void handleKeypress(State* st, int key)
-{
-
-}
-
 bool colliding(const Sprite* s1, const Sprite* s2)
 {
-	bool left  = s2->x + s2->w < s1->x;
-	bool right = s1->x + s1->w < s2->x;
-	bool below = s1->y + s1->h < s2->y;
-	bool above = s2->y + s2->h < s1->y;
+	bool left  = s2->x + s2->w <= s1->x;
+	bool right = s1->x + s1->w <= s2->x;
+	bool below = s1->y + s1->h <= s2->y;
+	bool above = s2->y + s2->h <= s1->y;
 	return !(left || right || below || above);
 }
 
@@ -256,9 +272,10 @@ bool detectAllCollisions(State* st)
 
 			// Rock-laser collisions break the rock and delete the laser
 			if(((isRock(s1) && isLaser(s2)) || (isLaser(s1) && isRock(s2)))
-			  && colliding(s1, s2)) {
+			  && colliding(s1, s2) && !delete[i] && !delete[j]) {
 		        delete[i] = true;
 				delete[j] = true;
+				st->score += 5;
 			}
 		}
 
@@ -272,8 +289,13 @@ bool detectAllCollisions(State* st)
 	// Delete marked sprites and exit
 	int n = 0;
 	for(SpriteList* a = st->sprites; a != NULL; n++) {
-		if(delete[n]) a = unloadSpriteInPlace(st, a);
-		else          a = a->next;
+		if(delete[n]) {
+			if(a->sprite->id == ASTER) breakAsteroid(st, a->sprite);
+			a = unloadSpriteInPlace(st, a);
+		}
+		else {
+			a = a->next;
+		}
 	}
 	free(delete);
 	return false;
@@ -342,32 +364,26 @@ void moveSprites(State* st)
 // if there are less than the maximum number of asteroids out already
 void checkSpawnAsteroid(State* st)
 {
+	SpriteList* s = st->sprites;
 
 #ifdef CBMC
-	__CPROVER_precondition(st->sprites != NULL, "");
+	__CPROVER_precondition(s != NULL, "");
 #endif //CBMC
 
     // Controls how many asteroids are on screen
     double spawn_chance = 0.05;
-    int max_asteroids = 12;
+    int max_ast = 12;
 
-    // Jump to end of list, counting (whole) asteroids seen along the way
+    // Count asteroids
     int n = 0;
-    SpriteList* a = st->sprites;
-    for(; a->next != NULL; a = a->next) if(a->sprite->id == ASTER) n++;
-	if(a->sprite->id == ASTER) n++;
+    for(SpriteList* a = s; a != NULL; n += a->sprite->id == ASTER, a = a->next);
 
     // If we're under capacity, chance to append new asteroid to list
-    if(n < max_asteroids && getRand() < spawn_chance) {
-        a->next = malloc(sizeof(SpriteList));
-        a->next->next = NULL;
-        a->next->prev = a;
-        a->next->sprite = spawnAsteroid();
-    }
+    if(n < max_ast && getRand() < spawn_chance) addSprite(st, spawnAsteroid());
 
 #ifdef CBMC
 	// There should still be asteroids after the fact
-	__CPROVER_postcondition(st->sprites != NULL, "Must be > 0 asteroids");
+	__CPROVER_postcondition(s != NULL, "Must be > 0 asteroids");
 #endif //CBMC
 }
 
@@ -425,19 +441,14 @@ void fireLaser(State* st)
 	lz->dy = l_v * -sin(t);
 
 	// Add laser to head of linked list of active sprites
-	SpriteList* head = malloc(sizeof(SpriteList));
-	head->prev = NULL;
-	head->next = st->sprites;
-	head->sprite = lz;
-	st->sprites->prev = head;
-	st->sprites = head;
+	addSprite(st, lz);
 }
 
 void updateLasers(State* st, const Uint8* keys)
 {
 	if(st->laser_cooldown > 0) st->laser_cooldown--;
 	if(st->laser_cooldown == 0 && keys[SDL_SCANCODE_SPACE]) {
-		st->laser_cooldown = 50;
+		st->laser_cooldown = 25;
 		fireLaser(st);
 	}
 }
@@ -467,7 +478,7 @@ bool updateGame(State* st, const Uint8* keys)
 	// Score goes up by 1 per frame
 	// TODO: increase max asteroids and
 	// decrease laser cooldown as score goes up
-	st->score++;
+	st->score += 10;
 	return false;
 }
 
@@ -502,7 +513,7 @@ void renderCooldown(int cd)
 	int h = 12;
 	int y = 50;
 	for(int i = 0; i < cd; i++) {
-		int x = 20 + i;
+		int x = 20 + i * 2;
 		SDL_Rect src = { 0, 0, w, h };
 	    SDL_Rect dst = { x, y, w, h };
 	    SDL_RenderCopyEx(renderer, line, &src, &dst, 180, NULL, SDL_FLIP_NONE);
