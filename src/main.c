@@ -16,6 +16,7 @@ typedef struct State
 	long long score;
     Sprite* ship;
 	int laser_cooldown;
+	bool thrust;
 	SpriteList* sprites; // linked list of active sprites
 }
 State;
@@ -205,6 +206,8 @@ bool loadGame(State* st)
     double c_y = (double) (SCREEN_HEIGHT - ship_h) / 2;
     st->ship = loadSprite(SHIP, ship_w, ship_h, c_x, c_y, "graphics/ship.bmp");
 	st->score = 0;
+	st->laser_cooldown = 0;
+	st->thrust = false;
 
     // "seed" the linked list with one asteroid - we don't want it to be empty.
     st->sprites = NULL;
@@ -355,9 +358,13 @@ void moveShip(State* st, const Uint8* keys)
 
     // Apply forces based on keystate
     if (keys[SDL_SCANCODE_UP]) {
+		st->thrust = true;
         s->dx += thrust * cos(s->theta);
         s->dy -= thrust * sin(s->theta);
     }
+	else {
+		st->thrust = false;
+	}
     if (keys[SDL_SCANCODE_LEFT]) {
         s->omega += torque;
     }
@@ -561,11 +568,34 @@ void renderCooldown(int cd)
 	SDL_DestroyTexture(line);
 }
 
+// Render a little flame behind the ship when it's accelerating
+void renderThrust(const Sprite* ship)
+{
+	int th_w = 10;
+	int th_h = 8;
+
+	int w = ship->w;
+	int h = ship->h;
+	double t = ship->theta;
+	int th_x = ship->x + w/2 + ((-w/2 - 4) * cos(t)) - th_w/2;
+	int th_y = ship->y + h/2 - ((-w/2 - 4) * sin(t)) - th_h/2;
+
+	SDL_Rect src = { 0, 0, th_w, th_h };
+    SDL_Rect dst = { th_x, th_y, th_w, th_h };
+    double rot = -t * (180.0 / M_PI);
+
+	SDL_Texture* tex = loadTexture("graphics/thrust.bmp");
+    SDL_RenderCopyEx(renderer, tex, &src, &dst, rot, NULL, SDL_FLIP_NONE);
+	SDL_DestroyTexture(tex);
+}
+
 // Render the entire game state each frame
 void renderGame(const State* st)
 {
     // Ship
     renderSprite(st->ship);
+
+	if(st->thrust) renderThrust(st->ship);
 
     // Sprites
     for(SpriteList* a = st->sprites; a; a = a->next) renderSprite(a->sprite);
