@@ -295,7 +295,9 @@ bool detectAllCollisions(State* st)
 	// Hash map of sprites marked for deletion
 	int len = 0;
 	for(SpriteList* a = st->sprites; a != NULL; a = a->next, len++);
-	bool* delete = calloc(len, sizeof(bool));
+
+	bool delete[len];
+	for (int i=0; i < len; i++) delete[i] = false;
 
 	// Detect any collisions and mark sprites for deletion
 	int i = 0;
@@ -321,7 +323,6 @@ bool detectAllCollisions(State* st)
 					st->score += 50;
 				}
 				else {
-					// TODO: possibly two different SFX here
 					playSfx(SFX_CRASH);
 				}
 			}
@@ -329,14 +330,17 @@ bool detectAllCollisions(State* st)
 
 		// Rock-ship collisions end the game
 		if(isRock(s1) && colliding(st->ship, s1)) {
-			free(delete);
 			return true;
 		}
 	}
 
 	// Delete marked sprites and exit
 	int n = 0;
+
 	for(SpriteList* a = st->sprites; a != NULL; n++) {
+#ifdef CBMC
+		__CPROVER_assert(n <= len, "Array access out of bounds!");
+#endif // CBMC
 		if(delete[n]) {
 			if(a->sprite->id == ASTER) breakAsteroid(st, a->sprite);
 			a = unloadSpriteInPlace(st, a);
@@ -345,7 +349,6 @@ bool detectAllCollisions(State* st)
 			a = a->next;
 		}
 	}
-	free(delete);
 	return false;
 }
 
