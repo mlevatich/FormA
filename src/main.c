@@ -308,7 +308,8 @@ bool detectAllCollisions(State* st)
 		for(SpriteList* b = a->next; b != NULL; b = b->next, j++) {
 			Sprite* s2 = b->sprite;
 
-			bool laserHit = (isRock(s1) && isLaser(s2)) || (isRock(s2) && isLaser(s1));
+			bool laserHit = (isRock(s1) && isLaser(s2))
+			             || (isRock(s2) && isLaser(s1));
 			bool asteroidsCollide = isRock(s1) && isRock(s2);
 
 			if((laserHit || asteroidsCollide)
@@ -316,12 +317,14 @@ bool detectAllCollisions(State* st)
 				delete[i] = true;
 				delete[j] = true;
 				// Laser hit sound
-				if (laserHit)
+				if (laserHit) {
 					playSfx(SFX_CRASH);
-				// TODO: different sound for asteroid collision?
-				else
+					st->score += 50;
+				}
+				else {
+					// TODO: possibly two different SFX here
 					playSfx(SFX_CRASH);
-				st->score += 50;
+				}
 			}
 		}
 
