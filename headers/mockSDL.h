@@ -9,7 +9,8 @@ check the game independently of SDL.
 enum {
     SDL_INIT_VIDEO, SDL_INIT_AUDIO,
     SDL_RENDERER_ACCELERATED,
-    SDL_FLIP_NONE, SDL_QUIT, SDL_KEYDOWN
+    SDL_FLIP_NONE, SDL_QUIT, SDL_KEYDOWN,
+    MIX_DEFAULT_FORMAT
 };
 
 // Used as array indicies, must not exceed length of spoofKeystate
@@ -24,6 +25,8 @@ typedef int SDL_Renderer;
 typedef int SDL_Texture;
 typedef int SDL_Surface;
 typedef int TTF_Font;
+typedef int Mix_Music;
+typedef int Mix_Chunk;
 typedef int Uint8;
 
 // SDL_Event, SDL_Color, SDL_Rect are accessed directly by us,
@@ -42,6 +45,7 @@ static Uint8 spoofKeystate[3] = { 1, 0, 1 };
 static inline int           SDL_Init(int a)                                                     { return 0; }
 static inline int           TTF_Init()                                                          { return 0; }
 static inline int           SDL_GetTicks()                                                      { return 0; }
+static inline int           Mix_PlayChannel(int a, Mix_Chunk* b, int c)                         { return 0; }
 
 // SDL_PollEvent must return 0 and set the event type to
 // an integer value which is not SDL_KEYDOWN or SDL_QUIT.
@@ -59,16 +63,27 @@ static inline SDL_Renderer* SDL_CreateRenderer(SDL_Window* a, int b, int c)     
 static inline SDL_Surface*  SDL_LoadBMP(const char* a)                                          { return NULL; }
 static inline SDL_Texture*  SDL_CreateTextureFromSurface(SDL_Renderer* a, SDL_Surface* b)       { return NULL; }
 static inline TTF_Font*     TTF_OpenFont(const char* a, int b)                                  { return NULL; }
+static inline Mix_Music*    Mix_LoadMUS(const char* a)                                          { return NULL; }
+static inline Mix_Chunk*    Mix_LoadWAV(const char* a)                                          { return NULL; }
 static inline SDL_Surface*  TTF_RenderText_Solid(TTF_Font* a, const char* b, SDL_Color c)       { return NULL; }
 
 // No-op functions
 static inline void          SDL_Quit()                                                          {}
+static inline void          TTF_Quit()                                                          {}
+static inline void          Mix_Quit()                                                          {}
 static inline void          SDL_Delay(int a)                                                    {}
 static inline void          SDL_SetRenderDrawColor(SDL_Renderer* a, int b, int c, int d, int e) {}
 static inline void          SDL_FreeSurface(SDL_Surface* a)                                     {}
 static inline void          SDL_DestroyTexture(SDL_Texture* a)                                  {}
 static inline void          SDL_DestroyRenderer(SDL_Renderer* a)                                {}
 static inline void          SDL_DestroyWindow(SDL_Window* a)                                    {}
+static inline void          TTF_CloseFont(TTF_Font* a)                                          {}
+static inline void          Mix_OpenAudio(int a, int b, int c, int d)                           {}
+static inline void          Mix_FreeMusic(Mix_Music* a)                                         {}
+static inline void          Mix_FreeChunk(Mix_Chunk* a)                                         {}
+static inline void          Mix_VolumeMusic(int a)                                              {}
+static inline void          Mix_PlayMusic(Mix_Music* a, int b)                                  {}
+static inline void          Mix_ExpireChannel(int a, int b)                                     {}
 static inline void          SDL_RenderClear(SDL_Renderer* a)                                    {}
 static inline void          SDL_RenderPresent(SDL_Renderer* a)                                  {}
 static inline void          SDL_RenderCopy(SDL_Renderer* a, SDL_Texture* b, void* c,

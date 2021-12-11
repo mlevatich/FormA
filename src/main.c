@@ -37,8 +37,7 @@ SDL_Texture* loadTexture(const char* path)
 // Play a sound effect
 void playSfx(int sfx_id)
 {
-	int ch = Mix_PlayChannel(-1, sfx[sfx_id], 0);
-	Mix_ExpireChannel(ch, 1000);
+	Mix_ExpireChannel(Mix_PlayChannel(-1, sfx[sfx_id], 0), 300);
 }
 
 // Load new sprite into the game
