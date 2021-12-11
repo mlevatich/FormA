@@ -132,11 +132,11 @@ void breakAsteroid(State* st, Sprite* a)
 	int w = 45;
 	int h = 44;
 	for(int i = 0; i < 4; i++) {
-		int x = a->x + 2 + (a->w / 2 - 2) * (i >= 2);
-		int y = a->y + 2 + (a->h / 2 - 2) * (i > 0 && i < 3);
+		int x = a->x + 2 + (1.5 * a->w / 2 - 2) * (i >= 2);
+		int y = a->y + 2 + (1.5 * a->h / 2 - 2) * (i > 0 && i < 3);
 		Sprite* f = loadSprite(FRAGMENT, w, h, x, y, "graphics/fragment.bmp");
-		f->dx = a->dx * (0.5 + getRand() * 0.2 - 0.1);
-		f->dy = a->dy * (0.5 + getRand() * 0.2 - 0.1);
+		f->dx = a->dx * (1 + getRand() * 0.2 - 0.1);
+		f->dy = a->dy * (1 + getRand() * 0.2 - 0.1);
 		f->theta = (i + getRand() * 0.4 - 0.2) * M_PI_2;
 		f->omega = a->omega * (0.5 + getRand() * 0.2 - 0.1);
 		addSprite(st, f);
@@ -308,12 +308,19 @@ bool detectAllCollisions(State* st)
 		for(SpriteList* b = a->next; b != NULL; b = b->next, j++) {
 			Sprite* s2 = b->sprite;
 
-			// Rock-laser collisions break the rock and delete the laser
-			if(((isRock(s1) && isLaser(s2)) || (isLaser(s1) && isRock(s2)))
+			bool laserHit = (isRock(s1) && isLaser(s2)) || (isRock(s2) && isLaser(s1));
+			bool asteroidsCollide = isRock(s1) && isRock(s2);
+
+			if((laserHit || asteroidsCollide)
 					&& colliding(s1, s2) && !delete[i] && !delete[j]) {
 				delete[i] = true;
 				delete[j] = true;
-				playSfx(SFX_CRASH);
+				// Laser hit sound
+				if (laserHit)
+					playSfx(SFX_CRASH);
+				// TODO: different sound for asteroid collision?
+				else
+					playSfx(SFX_CRASH);
 				st->score += 50;
 			}
 		}
@@ -465,6 +472,7 @@ void fireLaser(State* st)
 {
 	// Laser data. Velocity is at least 4, but in general is a little higher
 	// than the ship's velocity, so the ship can never outrun its own lasers
+	// TODO: add this as a CBMC check
 	Sprite* ship = st->ship;
 	int l_w = 2;
 	int l_h = 12;
