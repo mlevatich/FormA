@@ -464,7 +464,7 @@ void checkDespawnSprites(State* st)
 		}
 	}
 
-	// TODO: Check asteroids are all out of bounds
+	// TODO: Check asteroids are eventually all out of bounds
 #ifdef CBMC
 #endif // CBMC
 
@@ -477,7 +477,6 @@ void fireLaser(State* st)
 {
 	// Laser data. Velocity is at least 4, but in general is a little higher
 	// than the ship's velocity, so the ship can never outrun its own lasers
-	// TODO: add this as a CBMC check
 	Sprite* ship = st->ship;
 	int l_w = 2;
 	int l_h = 12;
@@ -502,6 +501,15 @@ void fireLaser(State* st)
 
 	// Laser sound effect
 	playSfx(SFX_LASER);
+
+/* Ship is never faster than the laser. */
+/* What a terrible engineering feat it would be if this were true! */
+#ifdef CBMC
+	__CPROVER_assert(abs(st->ship->dx) <= abs(lz->dx),
+			"Ship dx faster than laser!");
+	__CPROVER_assert(abs(st->ship->dy) <= abs(lz->dy),
+			"Ship dy faster than laser!");
+#endif // CBMC
 }
 
 void updateLasers(State* st, const Uint8* keys)
@@ -539,6 +547,12 @@ bool updateGame(State* st, const Uint8* keys)
 	// TODO: increase max asteroids and
 	// decrease laser cooldown as score goes up
 	st->score++;
+
+
+/* TODO: calculate that ship velocity is less than max velocity */
+#ifdef CBMC
+#endif // CBMC
+
 	return false;
 }
 
