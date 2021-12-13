@@ -45,7 +45,7 @@ void playSfx(int sfx_id)
 
 // Load new sprite into the game
 Sprite* loadSprite(int id, int w, int h, double x, double y,
-	               int nbb, SDL_Rect* bb, const char* path)
+		int nbb, SDL_Rect* bb, const char* path)
 {
 	Sprite* s = malloc(sizeof(Sprite));
 	s->id = id;
@@ -127,8 +127,8 @@ Sprite* spawnAsteroid(State* st)
 	// Load the sprite with the computed parameters
 	int nbb = 5;
 	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
-    bb[0] = (SDL_Rect) { 41, 1, 29, 71 };
-    bb[1] = (SDL_Rect) { 1, 18, 80, 23 };
+	bb[0] = (SDL_Rect) { 41, 1, 29, 71 };
+	bb[1] = (SDL_Rect) { 1, 18, 80, 23 };
 	bb[2] = (SDL_Rect) { 16, 10, 34, 71 };
 	bb[3] = (SDL_Rect) { 7, 42, 76, 15 };
 	bb[4] = (SDL_Rect) { 73, 54, 6, 15 };
@@ -149,8 +149,8 @@ void breakAsteroid(State* st, Sprite* a)
 		int y = a->y + 2 + (1.3 * a->h / 2 - 2) * (i > 0 && i < 3);
 		int nbb = 4;
 		SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
-	    bb[0] = (SDL_Rect) { 5, 13, 33, 19 };
-	    bb[1] = (SDL_Rect) { 1, 33, 38, 8 };
+		bb[0] = (SDL_Rect) { 5, 13, 33, 19 };
+		bb[1] = (SDL_Rect) { 1, 33, 38, 8 };
 		bb[2] = (SDL_Rect) { 37, 2, 7, 19 };
 		bb[3] = (SDL_Rect) { 19, 9, 19, 5 };
 		const char* path = "graphics/fragment.bmp";
@@ -237,8 +237,8 @@ bool loadGame(State* st)
 	double c_y = (double) (SCREEN_HEIGHT - ship_h) / 2;
 	int nbb = 2;
 	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
-    bb[0] = (SDL_Rect) { 2, 2, 7, 16 };
-    bb[1] = (SDL_Rect) { 4, 7, 16, 6 };
+	bb[0] = (SDL_Rect) { 2, 2, 7, 16 };
+	bb[1] = (SDL_Rect) { 4, 7, 16, 6 };
 	const char* path = "graphics/ship.bmp";
 	st->ship = loadSprite(SHIP, ship_w, ship_h, c_x, c_y, nbb, bb, path);
 	st->score = 0;
@@ -313,21 +313,21 @@ void quitGame(State* st)
 // comparing their arrays of bounding boxes
 bool colliding(const Sprite* s1, const Sprite* s2)
 {
-    // Nested for loop to compare each bounding box pair
-    SDL_Rect* b1 = s1->bb;
-    SDL_Rect* b2 = s2->bb;
-    for(int i = 0; i < s1->nbb; i++) {
-        int x1 = b1[i].x + s1->x;
-        int y1 = b1[i].y + s1->y;
-        for(int j = 0; j < s2->nbb; j++) {
-            int x2 = b2[j].x + s2->x;
-            int y2 = b2[j].y + s2->y;
+	// Nested for loop to compare each bounding box pair
+	SDL_Rect* b1 = s1->bb;
+	SDL_Rect* b2 = s2->bb;
+	for(int i = 0; i < s1->nbb; i++) {
+		int x1 = b1[i].x + s1->x;
+		int y1 = b1[i].y + s1->y;
+		for(int j = 0; j < s2->nbb; j++) {
+			int x2 = b2[j].x + s2->x;
+			int y2 = b2[j].y + s2->y;
 			bool x_aligned = (x1 < x2 + b2[j].w && x1 + b1[i].w > x2);
 			bool y_aligned = (y1 < y2 + b2[j].h && y1 + b1[i].h > y2);
-            if(x_aligned && y_aligned) return true;
-        }
-    }
-    return false;
+			if(x_aligned && y_aligned) return true;
+		}
+	}
+	return false;
 }
 
 bool isLaser(const Sprite* s)
@@ -360,20 +360,16 @@ bool detectAllCollisions(State* st)
 			Sprite* s2 = b->sprite;
 
 			bool laserHit = (isRock(s1) && isLaser(s2))
-			             || (isRock(s2) && isLaser(s1));
+				|| (isRock(s2) && isLaser(s1));
 			bool asteroidsCollide = isRock(s1) && isRock(s2);
 
 			if((laserHit || asteroidsCollide)
 					&& colliding(s1, s2) && !delete[i] && !delete[j]) {
 				delete[i] = true;
 				delete[j] = true;
-				// Laser hit sound
+				playSfx(SFX_CRASH);
 				if (laserHit) {
-					playSfx(SFX_CRASH);
 					st->score += 50;
-				}
-				else {
-					playSfx(SFX_CRASH);
 				}
 			}
 		}
@@ -521,10 +517,6 @@ void checkDespawnSprites(State* st)
 		}
 	}
 
-	// TODO: Check asteroids are eventually all out of bounds
-#ifdef CBMC
-#endif // CBMC
-
 	// If there are no sprites left, force an asteroid to spawn
 	// (linked list should never be empty)
 	ensureAsteroids(st);
@@ -550,7 +542,7 @@ void fireLaser(State* st)
 	// Spawn laser and set its direction and velocity
 	int nbb = 1;
 	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
-    bb[0] = (SDL_Rect) { 0, 0, 2, 12 };
+	bb[0] = (SDL_Rect) { 0, 0, 2, 12 };
 	const char* path = "graphics/laser.bmp";
 	Sprite* lz = loadSprite(LASER, l_w, l_h, l_x, l_y, nbb, bb, path);
 	lz->theta = t + M_PI_2;
@@ -563,8 +555,8 @@ void fireLaser(State* st)
 	// Laser sound effect
 	playSfx(SFX_LASER);
 
-/* Ship is never faster than the laser. */
-/* What a terrible engineering feat it would be if this were true! */
+	/* Ship is never faster than the laser. */
+	/* What a terrible engineering feat it would be if this were true! */
 #ifdef CBMC
 	__CPROVER_assert(abs(st->ship->dx) <= abs(lz->dx),
 			"Ship dx faster than laser!");
@@ -608,7 +600,7 @@ bool updateGame(State* st, const Uint8* keys)
 	st->score++;
 
 
-/* TODO: calculate that ship velocity is less than max velocity */
+	/* TODO: calculate that ship velocity is less than max velocity */
 #ifdef CBMC
 #endif // CBMC
 
@@ -620,27 +612,27 @@ void renderBounds(const Sprite* s)
 	// For each box, render 4 lines to create the rectangle
 
 	SDL_Texture* tex = loadTexture("graphics/dbg.bmp");
-    SDL_Rect* bb = s->bb;
-    for(int i = 0; i < s->nbb; i++) {
-        // Line 1
-        SDL_Rect box = bb[i];
-        SDL_Rect clip = { 0, 0, box.w, 1 };
-        SDL_Rect quad = { s->x + box.x, s->y + box.y, box.w, 1 };
-        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+	SDL_Rect* bb = s->bb;
+	for(int i = 0; i < s->nbb; i++) {
+		// Line 1
+		SDL_Rect box = bb[i];
+		SDL_Rect clip = { 0, 0, box.w, 1 };
+		SDL_Rect quad = { s->x + box.x, s->y + box.y, box.w, 1 };
+		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
 
-        // Line 2
-        quad = (SDL_Rect) { s->x + box.x, s->y + box.y + box.h, box.w, 1 };
-        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+		// Line 2
+		quad = (SDL_Rect) { s->x + box.x, s->y + box.y + box.h, box.w, 1 };
+		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
 
-        // Line 3
-        clip = (SDL_Rect) { 0, 0, 1, box.h };
-        quad = (SDL_Rect) { s->x + box.x, s->y + box.y, 1, box.h };
-        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+		// Line 3
+		clip = (SDL_Rect) { 0, 0, 1, box.h };
+		quad = (SDL_Rect) { s->x + box.x, s->y + box.y, 1, box.h };
+		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
 
-        // Line 4
-        quad = (SDL_Rect) { s->x + box.x + box.w, s->y + box.y, 1, box.h };
-        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
-    }
+		// Line 4
+		quad = (SDL_Rect) { s->x + box.x + box.w, s->y + box.y, 1, box.h };
+		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+	}
 
 	SDL_Rect clip = { 5, 5, 2, 2 };
 	SDL_Rect quad = { s->x, s->y, 2, 2 };
@@ -783,7 +775,7 @@ int main(int argc, char** argv)
 
 		// Cap framerate at MAX_FPS
 		double ms_per_frame = 1000.0 / MAX_FPS;
-		if(debug) ms_per_frame = 3000.0 / MAX_FPS;
+		if(debug) ms_per_frame *= 3;
 		int sleep_time = ms_per_frame - (SDL_GetTicks() - start_time);
 		if(sleep_time > 0) SDL_Delay(sleep_time);
 	}
