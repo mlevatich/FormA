@@ -28,6 +28,8 @@ typedef struct Sprite
     double dx;
     double dy;
     double omega;
+    SDL_Rect* bb;
+    int nbb;
 }
 Sprite;
 

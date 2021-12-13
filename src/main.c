@@ -11,6 +11,7 @@ Mix_Music* music = NULL;
 Mix_Chunk** sfx = NULL;
 Mix_Chunk* thrust_sfx = NULL;
 int thrust_ch = -1;
+bool debug = false;
 
 // Game state is captured by this data structure
 typedef struct State
@@ -43,7 +44,8 @@ void playSfx(int sfx_id)
 }
 
 // Load new sprite into the game
-Sprite* loadSprite(int id, int w, int h, double x, double y, const char* path)
+Sprite* loadSprite(int id, int w, int h, double x, double y,
+	               int nbb, SDL_Rect* bb, const char* path)
 {
 	Sprite* s = malloc(sizeof(Sprite));
 	s->id = id;
@@ -56,6 +58,8 @@ Sprite* loadSprite(int id, int w, int h, double x, double y, const char* path)
 	s->dx = 0;
 	s->dy = 0;
 	s->omega = 0;
+	s->nbb = nbb;
+	s->bb = bb;
 	return s;
 }
 
@@ -121,7 +125,15 @@ Sprite* spawnAsteroid(State* st)
 	}
 
 	// Load the sprite with the computed parameters
-	Sprite* a = loadSprite(ASTER, a_w, a_h, x, y, "graphics/asteroid.bmp");
+	int nbb = 5;
+	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
+    bb[0] = (SDL_Rect) { 41, 1, 29, 71 };
+    bb[1] = (SDL_Rect) { 1, 18, 80, 23 };
+	bb[2] = (SDL_Rect) { 16, 10, 34, 71 };
+	bb[3] = (SDL_Rect) { 7, 42, 76, 15 };
+	bb[4] = (SDL_Rect) { 73, 54, 6, 15 };
+	const char* path = "graphics/asteroid.bmp";
+	Sprite* a = loadSprite(ASTER, a_w, a_h, x, y, nbb, bb, path);
 	a->dx = dx;
 	a->dy = dy;
 	a->omega = ((getRand() * 0.1) - 0.05) * st->score / 16000.0;
@@ -135,7 +147,14 @@ void breakAsteroid(State* st, Sprite* a)
 	for(int i = 0; i < 4; i++) {
 		int x = a->x + 2 + (1.3 * a->w / 2 - 2) * (i >= 2);
 		int y = a->y + 2 + (1.3 * a->h / 2 - 2) * (i > 0 && i < 3);
-		Sprite* f = loadSprite(FRAGMENT, w, h, x, y, "graphics/fragment.bmp");
+		int nbb = 4;
+		SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
+	    bb[0] = (SDL_Rect) { 5, 13, 33, 19 };
+	    bb[1] = (SDL_Rect) { 1, 33, 38, 8 };
+		bb[2] = (SDL_Rect) { 37, 2, 7, 19 };
+		bb[3] = (SDL_Rect) { 19, 9, 19, 5 };
+		const char* path = "graphics/fragment.bmp";
+		Sprite* f = loadSprite(FRAGMENT, w, h, x, y, nbb, bb, path);
 		f->dx = a->dx * (1 + getRand() * 0.2 - 0.1);
 		f->dy = a->dy * (1 + getRand() * 0.2 - 0.1);
 		if(i >= 2) {
@@ -216,7 +235,12 @@ bool loadGame(State* st)
 	// Initial state
 	double c_x = (double) (SCREEN_WIDTH - ship_w) / 2;
 	double c_y = (double) (SCREEN_HEIGHT - ship_h) / 2;
-	st->ship = loadSprite(SHIP, ship_w, ship_h, c_x, c_y, "graphics/ship.bmp");
+	int nbb = 2;
+	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
+    bb[0] = (SDL_Rect) { 2, 2, 7, 16 };
+    bb[1] = (SDL_Rect) { 4, 7, 16, 6 };
+	const char* path = "graphics/ship.bmp";
+	st->ship = loadSprite(SHIP, ship_w, ship_h, c_x, c_y, nbb, bb, path);
 	st->score = 0;
 	st->laser_cooldown = 0;
 	st->thrust = false;
@@ -232,6 +256,7 @@ bool loadGame(State* st)
 void unloadSprite(Sprite* s)
 {
 	SDL_DestroyTexture(s->t);
+	free(s->bb);
 	free(s);
 }
 
@@ -284,13 +309,25 @@ void quitGame(State* st)
 	SDL_Quit();
 }
 
+// Precisely check if sprites are touching by
+// comparing their arrays of bounding boxes
 bool colliding(const Sprite* s1, const Sprite* s2)
 {
-	bool left  = s2->x + s2->w <= s1->x;
-	bool right = s1->x + s1->w <= s2->x;
-	bool below = s1->y + s1->h <= s2->y;
-	bool above = s2->y + s2->h <= s1->y;
-	return !(left || right || below || above);
+    // Nested for loop to compare each bounding box pair
+    SDL_Rect* b1 = s1->bb;
+    SDL_Rect* b2 = s2->bb;
+    for(int i = 0; i < s1->nbb; i++) {
+        int x1 = b1[i].x + s1->x;
+        int y1 = b1[i].y + s1->y;
+        for(int j = 0; j < s2->nbb; j++) {
+            int x2 = b2[j].x + s2->x;
+            int y2 = b2[j].y + s2->y;
+			bool x_aligned = (x1 < x2 + b2[j].w && x1 + b1[i].w > x2);
+			bool y_aligned = (y1 < y2 + b2[j].h && y1 + b1[i].h > y2);
+            if(x_aligned && y_aligned) return true;
+        }
+    }
+    return false;
 }
 
 bool isLaser(const Sprite* s)
@@ -511,7 +548,11 @@ void fireLaser(State* st)
 	int l_y = ship->y + (h - w * sin(t) - l_h * (1 - cos(t + M_PI_2))) / 2;
 
 	// Spawn laser and set its direction and velocity
-	Sprite* lz = loadSprite(LASER, l_w, l_h, l_x, l_y, "graphics/laser.bmp");
+	int nbb = 1;
+	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
+    bb[0] = (SDL_Rect) { 0, 0, 2, 12 };
+	const char* path = "graphics/laser.bmp";
+	Sprite* lz = loadSprite(LASER, l_w, l_h, l_x, l_y, nbb, bb, path);
 	lz->theta = t + M_PI_2;
 	lz->dx = l_v *  cos(t);
 	lz->dy = l_v * -sin(t);
@@ -564,8 +605,6 @@ bool updateGame(State* st, const Uint8* keys)
 	checkSpawnAsteroid(st);
 
 	// Score goes up by 1 per frame
-	// TODO: increase max asteroids and
-	// decrease laser cooldown as score goes up
 	st->score++;
 
 
@@ -576,6 +615,40 @@ bool updateGame(State* st, const Uint8* keys)
 	return false;
 }
 
+void renderBounds(const Sprite* s)
+{
+	// For each box, render 4 lines to create the rectangle
+
+	SDL_Texture* tex = loadTexture("graphics/dbg.bmp");
+    SDL_Rect* bb = s->bb;
+    for(int i = 0; i < s->nbb; i++) {
+        // Line 1
+        SDL_Rect box = bb[i];
+        SDL_Rect clip = { 0, 0, box.w, 1 };
+        SDL_Rect quad = { s->x + box.x, s->y + box.y, box.w, 1 };
+        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+
+        // Line 2
+        quad = (SDL_Rect) { s->x + box.x, s->y + box.y + box.h, box.w, 1 };
+        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+
+        // Line 3
+        clip = (SDL_Rect) { 0, 0, 1, box.h };
+        quad = (SDL_Rect) { s->x + box.x, s->y + box.y, 1, box.h };
+        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+
+        // Line 4
+        quad = (SDL_Rect) { s->x + box.x + box.w, s->y + box.y, 1, box.h };
+        SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+    }
+
+	SDL_Rect clip = { 5, 5, 2, 2 };
+	SDL_Rect quad = { s->x, s->y, 2, 2 };
+	SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+
+	SDL_DestroyTexture(tex);
+}
+
 // Render a single sprite
 void renderSprite(const Sprite* s)
 {
@@ -583,6 +656,7 @@ void renderSprite(const Sprite* s)
 	SDL_Rect dst = { (int) s->x, (int) s->y, s->w, s->h };
 	double rot = -s->theta * (180.0 / M_PI);
 	SDL_RenderCopyEx(renderer, s->t, &src, &dst, rot, NULL, SDL_FLIP_NONE);
+	if(debug) renderBounds(s);
 }
 
 // Render the current score
@@ -657,15 +731,12 @@ void renderGame(const State* st)
 int main(int argc, char** argv)
 {
 	// Parse command line arguments
-	if(argc > 1)
-	{
-		if(!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version"))
-		{
+	if(argc > 1) {
+		if(!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
 			printf("FormA 1.0.0\n");
 			return 0;
 		}
-		else if(!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))
-		{
+		else if(!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
 			printf("\nFormA 1.0.0\n\n");
 			printf("Options\n");
 			printf("----------------\n");
@@ -673,8 +744,10 @@ int main(int argc, char** argv)
 			printf("-h, --help           print help text\n\n");
 			return 0;
 		}
-		else
-		{
+		else if(!strcmp(argv[1], "-d") || !strcmp(argv[1], "--debug")) {
+			debug = true;
+		}
+		else {
 			printf("Unknown option: %s\n", argv[1]);
 			printf("Use -h or --help to see a list of available options.\n");
 			return 0;
@@ -683,16 +756,14 @@ int main(int argc, char** argv)
 
 	// Load game, make initial state
 	State st;
-	if(!loadGame(&st))
-	{
+	if(!loadGame(&st)) {
 		fprintf(stderr, "Error: Initialization Failed\n");
 		return 1;
 	}
 
 	// Game loop
 	bool quit = false;
-	while(!quit)
-	{
+	while(!quit) {
 		// Track how long this frame takes
 		int start_time = SDL_GetTicks();
 
@@ -712,6 +783,7 @@ int main(int argc, char** argv)
 
 		// Cap framerate at MAX_FPS
 		double ms_per_frame = 1000.0 / MAX_FPS;
+		if(debug) ms_per_frame = 3000.0 / MAX_FPS;
 		int sleep_time = ms_per_frame - (SDL_GetTicks() - start_time);
 		if(sleep_time > 0) SDL_Delay(sleep_time);
 	}
