@@ -23,11 +23,11 @@
 #define SAMPLE_RATE 44100
 #define NUM_CHANNELS 2
 #define CHUNK_SIZE 2048
-#define NUM_SFX 2
+#define NUM_SFX 3
 
 // List of sound effects
 enum sound_effects
-{ SFX_LASER, SFX_CRASH };
+{ SFX_LASER, SFX_CRASH, SFX_THRUST };
 
 // Mute the game's audio
 void setMute(void);

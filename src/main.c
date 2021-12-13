@@ -3,12 +3,14 @@
 #include "../headers/asteroid.h"
 #include <assert.h>
 
-// Window, renderer, font
+// Window, renderer, font, music
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 TTF_Font* font = NULL;
 Mix_Music* music = NULL;
 Mix_Chunk** sfx = NULL;
+Mix_Chunk* thrust_sfx = NULL;
+int thrust_ch = -1;
 
 // Game state is captured by this data structure
 typedef struct State
@@ -131,11 +133,23 @@ void breakAsteroid(State* st, Sprite* a)
 	int w = 45;
 	int h = 44;
 	for(int i = 0; i < 4; i++) {
-		int x = a->x + 2 + (1.5 * a->w / 2 - 2) * (i >= 2);
-		int y = a->y + 2 + (1.5 * a->h / 2 - 2) * (i > 0 && i < 3);
+		int x = a->x + 2 + (1.3 * a->w / 2 - 2) * (i >= 2);
+		int y = a->y + 2 + (1.3 * a->h / 2 - 2) * (i > 0 && i < 3);
 		Sprite* f = loadSprite(FRAGMENT, w, h, x, y, "graphics/fragment.bmp");
 		f->dx = a->dx * (1 + getRand() * 0.2 - 0.1);
 		f->dy = a->dy * (1 + getRand() * 0.2 - 0.1);
+		if(i >= 2) {
+			f->dx += 0.1;
+		}
+		else {
+			f->dx -= 0.1;
+		}
+		if(i > 0 && i < 3) {
+			f->dy += 0.1;
+		}
+		else {
+			f->dy -= 0.1;
+		}
 		f->theta = (i + getRand() * 0.4 - 0.2) * M_PI_2;
 		f->omega = a->omega * (0.5 + getRand() * 0.2 - 0.1);
 		addSprite(st, f);
@@ -187,18 +201,17 @@ bool loadGame(State* st)
 	Mix_OpenAudio(SAMPLE_RATE, MIX_DEFAULT_FORMAT, NUM_CHANNELS, CHUNK_SIZE);
 
 	// Load music and set volume
-	double track_select = getRand();
-	if(track_select < 0.5) music = Mix_LoadMUS("audio/bg1.wav");
-	else                   music = Mix_LoadMUS("audio/bg2.wav");
+	music = Mix_LoadMUS("audio/bg1.wav");
 	Mix_VolumeMusic(100);
 	Mix_PlayMusic(music, -1);
 
 	// Make space for sound effect list
 	sfx = (Mix_Chunk**) malloc(sizeof(Mix_Chunk*) * NUM_SFX);
 
-	// Menu navigation noises
+	// Sound effects
 	sfx[SFX_LASER] = Mix_LoadWAV("audio/laser.wav");
 	sfx[SFX_CRASH] = Mix_LoadWAV("audio/crash.wav");
+	sfx[SFX_THRUST] = Mix_LoadWAV("audio/thrust.wav");
 
 	// Initial state
 	double c_x = (double) (SCREEN_WIDTH - ship_w) / 2;
@@ -371,11 +384,18 @@ void moveShip(State* st, const Uint8* keys)
 	// Apply forces based on keystate
 	if (keys[SDL_SCANCODE_UP]) {
 		st->thrust = true;
+		if(thrust_ch == -1) {
+			thrust_ch = Mix_PlayChannel(-1, sfx[SFX_THRUST], -1);
+		}
 		s->dx += thrust * cos(s->theta);
 		s->dy -= thrust * sin(s->theta);
 	}
 	else {
 		st->thrust = false;
+		if(thrust_ch != -1) {
+			Mix_HaltChannel(thrust_ch);
+			thrust_ch = -1;
+		}
 	}
 	if (keys[SDL_SCANCODE_LEFT]) {
 		s->omega += torque;
