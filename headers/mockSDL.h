@@ -84,6 +84,7 @@ static inline void          Mix_FreeChunk(Mix_Chunk* a)                         
 static inline void          Mix_VolumeMusic(int a)                                              {}
 static inline void          Mix_PlayMusic(Mix_Music* a, int b)                                  {}
 static inline void          Mix_ExpireChannel(int a, int b)                                     {}
+static inline void          Mix_HaltChannel(int a)                                              {}
 static inline void          SDL_RenderClear(SDL_Renderer* a)                                    {}
 static inline void          SDL_RenderPresent(SDL_Renderer* a)                                  {}
 static inline void          SDL_RenderCopy(SDL_Renderer* a, SDL_Texture* b, void* c,
