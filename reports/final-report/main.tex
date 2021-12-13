@@ -20,7 +20,10 @@
 \newcommand{\cbmc}{\texttt{CBMC}}
 
 \title{COMS 6863 Final Project Status Report: \Name{}}
-\author{Max Levatich \& Wonhyuk (Harry) Choi}
+\author{
+    Max Levatich$^*$ \& Wonhyuk (Harry) Choi
+    \footnote{Both authors contributed equally to the project.}
+}
 \date{\today}
 
 \begin{document}
@@ -167,6 +170,7 @@ Most notably, it was able to show a null pointer dereference that we had in our 
 \end{figure}
 
 \subsection{Using \cbmc}
+\subsubsection{Creating interface API for \cbmc}
 In order to use \cbmc, we were forced to de-couple the implementation of our game with its graphical implementation.
 When we try to invoke \cbmc on the \texttt{SDL} library, even with the simplest code listing as below:
 \begin{verbatim}
@@ -184,6 +188,21 @@ results in an error as shown in Figure~\ref{fig:cbmc-sdl}, even though the code 
 We decided to create a mock interface that has the same definitions of the library, without its implementations,
 since we were not interested in checking the correctness of the \texttt{SDL} library.
 
+\subsubsection{Writing good properties}
+We found that writing properties was actually difficult -- creating the specification of the project was a major problem.
+
+
+\subsubsection{Limited size checking of BMC}
+As with all code, our codebase heavily relies on loops, and this exploded the size of our problem.
+Even when we ran loops with depth $2$, they were heavily nested and took more than ten minutes to run.
+
+Additionally, we wanted to check properties that are preserved across different functions calls (e.g. that the plane and the laser never collide), and so it was not always possible to instantiate environment assumptions for each function call.
+
+\subsubsection{Debugging long error traces}
+When we were able to find violations in our properties, we found that the counterexample traces that we found were very long.
+For instance, for checking that our ship was in bounds, we obtained a counterexample trace (cf. Appendix ~\ref{appendix:trace}) that was $199$ transitions long.
+This made debugging the property very difficult -- although perhaps a subtle error that we would not have been able to obtain without formal verification.
+
 \section{Completed Project}
 The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
 
@@ -195,11 +214,12 @@ The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids th
 
 \section{Lessons Learned}
 
-\section{Teamwork}
-Both members of the team contributed equally to the project,
-including the coding of the game, preparing for/using CBMC, and writing report documents.
-
 \bibliographystyle{IEEEtran}
 \bibliography{proposal}
+
+\appendix
+\section{Counterexample Trace for Property Violation}
+\label{appendix:trace}
+\include{trace}
 
 \end{document}
