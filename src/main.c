@@ -324,10 +324,10 @@ Circle makeCircle(const Sprite* s, double radius)
 	return circle;
 }
 
-// TODO
-bool circleOverlap(Circle c1, Circle c2)
+bool circleIntersect(Circle c1, Circle c2)
 {
-	return true;
+	double centerDist = sqrt(pow((c1.x - c2.x),2) + pow((c1.y - c2.y),2));
+	return centerDist <= c1.r + c2.r;
 }
 
 // Precisely check if sprites are touching by
@@ -346,22 +346,22 @@ bool colliding(const Sprite* s1, const Sprite* s2)
 			bool x_aligned = (x1 < x2 + b2[j].w && x1 + b1[i].w > x2);
 			bool y_aligned = (y1 < y2 + b2[j].h && y1 + b1[i].h > y2);
 			if(x_aligned && y_aligned) {
-// Overapproximation
+				// Overapproximation
 #ifdef CBMC
 				Circle circle1 = makeCircle(s1, max(s1->w, s1->h));
 				Circle circle2 = makeCircle(s2, max(s2->w, s2->h));
-				__CPROVER_assert(circleOverlap(circle1, circle2),
-					"Colliding -- overapproximation should also collide!");
+				__CPROVER_assert(circleIntersect(circle1, circle2),
+						"Colliding -- overapproximation should also collide!");
 #endif // CBMC
 				return true;
 			}
 		}
 	}
-// Underapproximation
+	// Underapproximation
 #ifdef CBMC
 	Circle circle1 = makeCircle(s1, min(s1->w, s1->h));
 	Circle circle2 = makeCircle(s2, min(s2->w, s2->h));
-	__CPROVER_assert(!circleOverlap(circle1, circle2),
+	__CPROVER_assert(!circleIntersect(circle1, circle2),
 			"Not colliding -- underapproximation should not collide!");
 #endif // CBMC
 	return false;
