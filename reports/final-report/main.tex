@@ -196,7 +196,7 @@ We found that writing properties was actually difficult -- creating the specific
 As with all code, our codebase heavily relies on loops, and this exploded the size of our problem.
 Even when we ran loops with depth $2$, they were heavily nested and took more than ten minutes to run.
 
-Additionally, we wanted to check properties that are preserved across different functions calls (e.g. that the plane and the laser never collide), and so it was not always possible to instantiate environment assumptions for each function call.
+Additionally, we wanted to check properties that are preserved across dfferent functions calls (e.g. that the plane and the laser never collide), and so it was not always possible to instantiate environment assumptions for each function call.
 
 \subsubsection{Debugging long error traces}
 When we were able to find violations in our properties, we found that the counterexample traces that we found were very long.

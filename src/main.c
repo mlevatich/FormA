@@ -449,9 +449,9 @@ void moveShip(State* st, const Uint8* keys)
 	if(s->y < 0 - s->h)      s->y = SCREEN_HEIGHT;
 
 #ifdef CBMC
-	bool xOutOfBounds = 0 < s->x || SCREEN_WIDTH < s->x;
-	bool yOutOfBounds = 0 < s->y || SCREEN_HEIGHT < s->y;
-	__CPROVER_assert(!(xOutOfBounds || yOutOfBounds), "OOB");
+	bool xInBound = -s->w <= s->x && s->x <= SCREEN_WIDTH + s->w;
+	bool yInBound = -s->h <= s->y && s->y <= SCREEN_HEIGHT + s->h;
+	__CPROVER_assert(xInBound && yInBound, "Out of Bounds!");
 #endif // CBMC
 }
 
@@ -473,7 +473,7 @@ void moveSprites(State* st)
 void checkSpawnAsteroid(State* st)
 {
 #ifdef CBMC
-	__CPROVER_precondition(st->sprites != NULL, "");
+	__CPROVER_precondition(st->sprites != NULL, "There are always asteroids.");
 #endif //CBMC
 
 	// Controls how many asteroids are on screen
