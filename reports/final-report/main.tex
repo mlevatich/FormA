@@ -163,7 +163,7 @@
 \subsection{Comparison with \texttt{clang-tidy}}
 We also employed the tool \texttt{clang-tidy} to catch possible bugs through static analysis.
 Most notably, it was able to show a null pointer dereference that we had in our code (Figure~\ref{fig:clang-tidy})
-\begin{figure}[!h]
+\begin{figure}[h!]
     \includegraphics[width=\linewidth]{clang-tidy.png}
     \caption{Using \texttt{clang-tidy}}
     \label{fig:clang-tidy}
@@ -179,7 +179,7 @@ int main(){}
 \end{verbatim}
 results in an error as shown in Figure~\ref{fig:cbmc-sdl}, even though the code runs properly.
 
-\begin{figure}[!h]
+\begin{figure}[h!]
     \includegraphics[width=\linewidth]{cbmc-sdl.png}
     \caption{Error with SDL2 and CBMC}
     \label{fig:cbmc-sdl}
@@ -195,8 +195,15 @@ We found that writing properties was actually difficult -- creating the specific
 \subsubsection{Limited size checking of BMC}
 As with all code, our codebase heavily relies on loops, and this exploded the size of our problem.
 Even when we ran loops with depth $2$, they were heavily nested and took more than ten minutes to run.
+Without the stipulation, our computers ran out of memory to compute the entire state-space (Figure~\ref{fig:killed}).
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{killed.png}
+    \caption{Out of Memory}
+    \label{fig:killed}
+\end{figure}
 
 Additionally, we wanted to check properties that are preserved across different functions calls (e.g. that the plane and the laser never collide), and so it was not always possible to instantiate environment assumptions for each function call.
+
 
 \subsubsection{Debugging long error traces}
 When we were able to find violations in our properties, we found that the counterexample traces that we found were very long.
@@ -206,7 +213,7 @@ This made debugging the property very difficult -- although perhaps a subtle err
 \section{Completed Project}
 The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
 
-\begin{figure}[!h]
+\begin{figure}[h!]
     \includegraphics[width=\linewidth]{gameplay.png}
     \caption{Screenshot of \Name}
     \label{fig:gameplay}

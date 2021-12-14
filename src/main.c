@@ -346,8 +346,8 @@ bool colliding(const Sprite* s1, const Sprite* s2)
 			bool x_aligned = (x1 < x2 + b2[j].w && x1 + b1[i].w > x2);
 			bool y_aligned = (y1 < y2 + b2[j].h && y1 + b1[i].h > y2);
 			if(x_aligned && y_aligned) {
-				// Overapproximation
 #ifdef CBMC
+				// Overapproximation
 				Circle circle1 = makeCircle(s1, max(s1->w, s1->h));
 				Circle circle2 = makeCircle(s2, max(s2->w, s2->h));
 				__CPROVER_assert(circleIntersect(circle1, circle2),
@@ -357,8 +357,8 @@ bool colliding(const Sprite* s1, const Sprite* s2)
 			}
 		}
 	}
-	// Underapproximation
 #ifdef CBMC
+	// Underapproximation
 	Circle circle1 = makeCircle(s1, min(s1->w, s1->h));
 	Circle circle2 = makeCircle(s2, min(s2->w, s2->h));
 	__CPROVER_assert(!circleIntersect(circle1, circle2),
