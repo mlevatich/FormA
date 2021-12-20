@@ -1,819 +1,274 @@
 \begin{verbatim}
-src/main.c function moveShip
-[moveShip.assertion.1] line 401 OOB: FAILURE
-
-src/main.c function fireLaser
-[fireLaser.assertion.1] line 508 Ship dx faster than laser!: SUCCESS
-[fireLaser.assertion.2] line 510 Ship dy faster than laser!: SUCCESS
-
-src/main.c function updateGame
-[updateGame.precondition_instance.1] line 544 : SUCCESS
-
 Trace for moveShip.assertion.1:
 
-State 23 function __CPROVER__start thread 0
-----------------------------------------------------
-  INPUT argc: 1 (00000000 00000000 00000000 00000001)
-
-State 27 file src/main.c function __CPROVER__start line 637 thread 0
-----------------------------------------------------
-  argc=1 (00000000 00000000 00000000 00000001)
-
-State 28 file src/main.c function __CPROVER__start line 637 thread 0
-----------------------------------------------------
-  argv=argv' (00011000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 30 file src/main.c function main line 665 thread 0
-----------------------------------------------------
-  st={ .score=0l, .ship=((Sprite *)NULL), .laser_cooldown=0, .thrust=FALSE,
-    .$pad4=0, .sprites=((SpriteList *)NULL) } ({ 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000, 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000, 00000000 00000000 00000000 00000000, 00000000, 00000000 00000000 00000000, 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 })
-
-State 34 file src/main.c function main line 666 thread 0
-----------------------------------------------------
-  st=&st!0@1 (00011101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 35 file src/main.c function loadGame line 160 thread 0
-----------------------------------------------------
-  ship_w=0 (00000000 00000000 00000000 00000000)
-
-State 36 file src/main.c function loadGame line 160 thread 0
-----------------------------------------------------
-  ship_w=20 (00000000 00000000 00000000 00010100)
-
-State 37 file src/main.c function loadGame line 161 thread 0
-----------------------------------------------------
-  ship_h=0 (00000000 00000000 00000000 00000000)
-
-State 38 file src/main.c function loadGame line 161 thread 0
-----------------------------------------------------
-  ship_h=20 (00000000 00000000 00000000 00010100)
-
-State 39 file src/main.c function loadGame line 164 thread 0
-----------------------------------------------------
-  tm={ .tv_sec=0l, .tv_usec=1751545022280197l } ({ 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000, 00000000 00000110 00111001 00000101 01011010 11011100 01110010 00000101 })
-
-State 49 file src/main.c function loadGame line 169 thread 0
-----------------------------------------------------
-  a=1 (00000000 00000000 00000000 00000001)
-
-State 56 file src/main.c function loadGame line 172 thread 0
-----------------------------------------------------
-  a=&'F' (00011110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 57 file src/main.c function loadGame line 172 thread 0
-----------------------------------------------------
-  b=20 (00000000 00000000 00000000 00010100)
-
-State 58 file src/main.c function loadGame line 172 thread 0
-----------------------------------------------------
-  c=0 (00000000 00000000 00000000 00000000)
-
-State 59 file src/main.c function loadGame line 172 thread 0
-----------------------------------------------------
-  d=1024 (00000000 00000000 00000100 00000000)
-
-State 60 file src/main.c function loadGame line 172 thread 0
-----------------------------------------------------
-  e=768 (00000000 00000000 00000011 00000000)
-
-State 61 file src/main.c function loadGame line 172 thread 0
-----------------------------------------------------
-  f=0 (00000000 00000000 00000000 00000000)
-
-State 64 file src/main.c function loadGame line 172 thread 0
-----------------------------------------------------
-  window=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
-
-State 68 file src/main.c function loadGame line 176 thread 0
-----------------------------------------------------
-  a=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
-
-State 69 file src/main.c function loadGame line 176 thread 0
-----------------------------------------------------
-  b=-1 (11111111 11111111 11111111 11111111)
-
-State 70 file src/main.c function loadGame line 176 thread 0
-----------------------------------------------------
-  c=2 (00000000 00000000 00000000 00000010)
-
-State 73 file src/main.c function loadGame line 176 thread 0
-----------------------------------------------------
-  renderer=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
-
-State 77 file src/main.c function loadGame line 180 thread 0
-----------------------------------------------------
-  a=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
-
-State 78 file src/main.c function loadGame line 180 thread 0
-----------------------------------------------------
-  b=0 (00000000 00000000 00000000 00000000)
-
-State 79 file src/main.c function loadGame line 180 thread 0
-----------------------------------------------------
-  c=0 (00000000 00000000 00000000 00000000)
-
-State 80 file src/main.c function loadGame line 180 thread 0
-----------------------------------------------------
-  d=0 (00000000 00000000 00000000 00000000)
-
-State 81 file src/main.c function loadGame line 180 thread 0
-----------------------------------------------------
-  e=255 (00000000 00000000 00000000 11111111)
-
-State 89 file src/main.c function loadGame line 184 thread 0
-----------------------------------------------------
-  a=&'g' (00011111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 90 file src/main.c function loadGame line 184 thread 0
-----------------------------------------------------
-  b=24 (00000000 00000000 00000000 00011000)
-
-State 93 file src/main.c function loadGame line 184 thread 0
-----------------------------------------------------
-  font=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 96 file src/main.c function loadGame line 187 thread 0
-----------------------------------------------------
-  a=44100 (00000000 00000000 10101100 01000100)
-
-State 97 file src/main.c function loadGame line 187 thread 0
-----------------------------------------------------
-  b=6 (00000000 00000000 00000000 00000110)
-
-State 98 file src/main.c function loadGame line 187 thread 0
-----------------------------------------------------
-  c=2 (00000000 00000000 00000000 00000010)
-
-State 99 file src/main.c function loadGame line 187 thread 0
-----------------------------------------------------
-  d=2048 (00000000 00000000 00001000 00000000)
-
-State 101 file src/main.c function loadGame line 190 thread 0
-----------------------------------------------------
-  track_select=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 111 file src/main.c function loadGame line 190 thread 0
-----------------------------------------------------
-  track_select=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 115 file src/main.c function loadGame line 191 thread 0
-----------------------------------------------------
-  a=&'a' (00100000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 118 file src/main.c function loadGame line 191 thread 0
-----------------------------------------------------
-  music=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 122 file src/main.c function loadGame line 193 thread 0
-----------------------------------------------------
-  a=100 (00000000 00000000 00000000 01100100)
-
-State 126 file src/main.c function loadGame line 194 thread 0
-----------------------------------------------------
-  a=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 127 file src/main.c function loadGame line 194 thread 0
-----------------------------------------------------
-  b=-1 (11111111 11111111 11111111 11111111)
-
-State 132 file src/main.c function loadGame line 197 thread 0
-----------------------------------------------------
-  malloc_size=16ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00010000)
-
-State 150 file src/main.c function loadGame line 197 thread 0
-----------------------------------------------------
-  sfx=dynamic_object1 (00100010 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 153 file src/main.c function loadGame line 200 thread 0
-----------------------------------------------------
-  a=&'a' (00100011 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 156 file src/main.c function loadGame line 200 thread 0
-----------------------------------------------------
-  dynamic_object1[0l]=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 159 file src/main.c function loadGame line 201 thread 0
-----------------------------------------------------
-  a=&'a' (00100100 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 162 file src/main.c function loadGame line 201 thread 0
-----------------------------------------------------
-  dynamic_object1[1l]=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 163 file src/main.c function loadGame line 204 thread 0
-----------------------------------------------------
-  c_x=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 164 file src/main.c function loadGame line 204 thread 0
-----------------------------------------------------
-  c_x=502.0 (01000000 01111111 01100000 00000000 00000000 00000000 00000000 00000000)
-
-State 165 file src/main.c function loadGame line 205 thread 0
-----------------------------------------------------
-  c_y=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 166 file src/main.c function loadGame line 205 thread 0
-----------------------------------------------------
-  c_y=374.0 (01000000 01110111 01100000 00000000 00000000 00000000 00000000 00000000)
-
-State 169 file src/main.c function loadGame line 206 thread 0
-----------------------------------------------------
-  id=3 (00000000 00000000 00000000 00000011)
-
-State 170 file src/main.c function loadGame line 206 thread 0
-----------------------------------------------------
-  w=20 (00000000 00000000 00000000 00010100)
-
-State 171 file src/main.c function loadGame line 206 thread 0
-----------------------------------------------------
-  h=20 (00000000 00000000 00000000 00010100)
-
-State 172 file src/main.c function loadGame line 206 thread 0
-----------------------------------------------------
-  x=502.0 (01000000 01111111 01100000 00000000 00000000 00000000 00000000 00000000)
-
-State 173 file src/main.c function loadGame line 206 thread 0
-----------------------------------------------------
-  y=374.0 (01000000 01110111 01100000 00000000 00000000 00000000 00000000 00000000)
-
-State 174 file src/main.c function loadGame line 206 thread 0
-----------------------------------------------------
-  path=&'g' (00100101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 175 file src/main.c function loadSprite line 46 thread 0
-----------------------------------------------------
-  s=((struct Sprite { signed int id; unsigned int $pad1; signed int *t; signed int w; signed int h; double x; double y; double theta; double dx; double dy; double omega; } *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 179 file src/main.c function loadSprite line 46 thread 0
-----------------------------------------------------
-  malloc_size=72ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 01001000)
-
-State 197 file src/main.c function loadSprite line 46 thread 0
-----------------------------------------------------
-  s=&dynamic_object2 (00100110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 198 file src/main.c function loadSprite line 47 thread 0
-----------------------------------------------------
-  dynamic_object2.id=3 (00000000 00000000 00000000 00000011)
-
-State 201 file src/main.c function loadSprite line 48 thread 0
-----------------------------------------------------
-  path=&'g' (00100101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 202 file src/main.c function loadTexture line 28 thread 0
-----------------------------------------------------
-  newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 203 file src/main.c function loadTexture line 28 thread 0
-----------------------------------------------------
-  newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 204 file src/main.c function loadTexture line 29 thread 0
-----------------------------------------------------
-  loaded=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 207 file src/main.c function loadTexture line 29 thread 0
-----------------------------------------------------
-  a=&'g' (00100101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 210 file src/main.c function loadTexture line 29 thread 0
-----------------------------------------------------
-  loaded=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 213 file src/main.c function loadTexture line 32 thread 0
-----------------------------------------------------
-  a=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
-
-State 214 file src/main.c function loadTexture line 32 thread 0
-----------------------------------------------------
-  b=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 217 file src/main.c function loadTexture line 32 thread 0
-----------------------------------------------------
-  newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 220 file src/main.c function loadTexture line 33 thread 0
-----------------------------------------------------
-  a=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 224 file src/main.c function loadSprite line 48 thread 0
-----------------------------------------------------
-  dynamic_object2.t=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 225 file src/main.c function loadSprite line 49 thread 0
-----------------------------------------------------
-  dynamic_object2.w=20 (00000000 00000000 00000000 00010100)
-
-State 226 file src/main.c function loadSprite line 50 thread 0
-----------------------------------------------------
-  dynamic_object2.h=20 (00000000 00000000 00000000 00010100)
-
-State 227 file src/main.c function loadSprite line 51 thread 0
-----------------------------------------------------
-  dynamic_object2.x=502.0 (01000000 01111111 01100000 00000000 00000000 00000000 00000000 00000000)
-
-State 228 file src/main.c function loadSprite line 52 thread 0
-----------------------------------------------------
-  dynamic_object2.y=374.0 (01000000 01110111 01100000 00000000 00000000 00000000 00000000 00000000)
-
-State 229 file src/main.c function loadSprite line 53 thread 0
-----------------------------------------------------
-  dynamic_object2.theta=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
-
-State 230 file src/main.c function loadSprite line 54 thread 0
-----------------------------------------------------
-  dynamic_object2.dx=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 231 file src/main.c function loadSprite line 55 thread 0
-----------------------------------------------------
-  dynamic_object2.dy=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 232 file src/main.c function loadSprite line 56 thread 0
-----------------------------------------------------
-  dynamic_object2.omega=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 235 file src/main.c function loadGame line 206 thread 0
-----------------------------------------------------
-  st.ship=&dynamic_object2 (00100110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 236 file src/main.c function loadGame line 207 thread 0
-----------------------------------------------------
-  st.score=0l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 237 file src/main.c function loadGame line 208 thread 0
-----------------------------------------------------
-  st.laser_cooldown=0 (00000000 00000000 00000000 00000000)
-
-State 238 file src/main.c function loadGame line 209 thread 0
-----------------------------------------------------
-  st.thrust=FALSE (00000000)
-
-State 239 file src/main.c function loadGame line 212 thread 0
-----------------------------------------------------
-  st.sprites=((SpriteList *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 242 file src/main.c function loadGame line 213 thread 0
-----------------------------------------------------
-  st=&st!0@1 (00011101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 247 file src/main.c function ensureAsteroids line 149 thread 0
-----------------------------------------------------
-  st=&st!0@1 (00011101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 248 file src/main.c function spawnAsteroid line 76 thread 0
-----------------------------------------------------
-  a_w=0 (00000000 00000000 00000000 00000000)
-
-State 249 file src/main.c function spawnAsteroid line 76 thread 0
-----------------------------------------------------
-  a_w=84 (00000000 00000000 00000000 01010100)
-
-State 250 file src/main.c function spawnAsteroid line 77 thread 0
-----------------------------------------------------
-  a_h=0 (00000000 00000000 00000000 00000000)
-
-State 251 file src/main.c function spawnAsteroid line 77 thread 0
-----------------------------------------------------
-  a_h=83 (00000000 00000000 00000000 01010011)
-
-State 252 file src/main.c function spawnAsteroid line 81 thread 0
-----------------------------------------------------
-  ratio=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 253 file src/main.c function spawnAsteroid line 81 thread 0
-----------------------------------------------------
-  ratio=1.333333 (00111111 11110101 01010101 01010101 01010101 01010101 01010101 01010101)
-
-State 254 file src/main.c function spawnAsteroid line 82 thread 0
-----------------------------------------------------
-  weighted_chance=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 255 file src/main.c function spawnAsteroid line 82 thread 0
-----------------------------------------------------
-  weighted_chance=0.666667 (00111111 11100101 01010101 01010101 01010101 01010101 01010101 01010101)
-
-State 256 file src/main.c function spawnAsteroid line 85 thread 0
-----------------------------------------------------
-  x=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 257 file src/main.c function spawnAsteroid line 85 thread 0
-----------------------------------------------------
-  x=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 258 file src/main.c function spawnAsteroid line 86 thread 0
-----------------------------------------------------
-  y=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 259 file src/main.c function spawnAsteroid line 86 thread 0
-----------------------------------------------------
-  y=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 260 file src/main.c function spawnAsteroid line 87 thread 0
-----------------------------------------------------
-  dx=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 274 file src/main.c function spawnAsteroid line 87 thread 0
-----------------------------------------------------
-  a=1.343875 (00111111 11110101 10000000 10000010 11100101 10101011 00000001 00000110)
-
-State 275 file src/main.c function spawnAsteroid line 87 thread 0
-----------------------------------------------------
-  b=3.0 (01000000 00001000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 280 file src/main.c function spawnAsteroid line 87 thread 0
-----------------------------------------------------
-  dx=1.343875 (00111111 11110101 10000000 10000010 11100101 10101011 00000001 00000110)
-
-State 281 file src/main.c function spawnAsteroid line 88 thread 0
-----------------------------------------------------
-  dy=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 295 file src/main.c function spawnAsteroid line 88 thread 0
-----------------------------------------------------
-  a=2.561137e-9 (00111110 00100110 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 296 file src/main.c function spawnAsteroid line 88 thread 0
-----------------------------------------------------
-  b=3.0 (01000000 00001000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 301 file src/main.c function spawnAsteroid line 88 thread 0
-----------------------------------------------------
-  dy=2.561137e-9 (00111110 00100110 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 302 file src/main.c function spawnAsteroid line 91 thread 0
-----------------------------------------------------
-  where=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 312 file src/main.c function spawnAsteroid line 91 thread 0
-----------------------------------------------------
-  where=0.63135 (00111111 11100100 00110100 00000100 11111010 00101000 01101000 00001010)
-
-State 326 file src/main.c function spawnAsteroid line 100 thread 0
-----------------------------------------------------
-  x=-708.486346 (11000000 10000110 00100011 11100100 00001001 01110011 01000111 11001000)
-
-State 327 file src/main.c function spawnAsteroid line 101 thread 0
-----------------------------------------------------
-  y=768.0 (01000000 10001000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 328 file src/main.c function spawnAsteroid line 102 thread 0
-----------------------------------------------------
-  dx=0.671937 (00111111 11100101 10000000 10000010 11100101 10101011 00000001 00000110)
-
-State 329 file src/main.c function spawnAsteroid line 103 thread 0
-----------------------------------------------------
-  dy=-2.561137e-9 (10111110 00100110 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 331 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  a=((struct Sprite { signed int id; unsigned int $pad1; signed int *t; signed int w; signed int h; double x; double y; double theta; double dx; double dy; double omega; } *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 334 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  id=0 (00000000 00000000 00000000 00000000)
-
-State 335 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  w=84 (00000000 00000000 00000000 01010100)
-
-State 336 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  h=83 (00000000 00000000 00000000 01010011)
-
-State 337 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  x=-708.486346 (11000000 10000110 00100011 11100100 00001001 01110011 01000111 11001000)
-
-State 338 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  y=768.0 (01000000 10001000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 339 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  path=&'g' (00100111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 340 file src/main.c function loadSprite line 46 thread 0
-----------------------------------------------------
-  s=((struct Sprite { signed int id; unsigned int $pad1; signed int *t; signed int w; signed int h; double x; double y; double theta; double dx; double dy; double omega; } *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 344 file src/main.c function loadSprite line 46 thread 0
-----------------------------------------------------
-  malloc_size=72ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 01001000)
-
-State 362 file src/main.c function loadSprite line 46 thread 0
-----------------------------------------------------
-  s=&dynamic_object3 (00010000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 363 file src/main.c function loadSprite line 47 thread 0
-----------------------------------------------------
-  dynamic_object3.id=0 (00000000 00000000 00000000 00000000)
-
-State 366 file src/main.c function loadSprite line 48 thread 0
-----------------------------------------------------
-  path=&'g' (00100111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 367 file src/main.c function loadTexture line 28 thread 0
-----------------------------------------------------
-  newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 368 file src/main.c function loadTexture line 28 thread 0
-----------------------------------------------------
-  newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 369 file src/main.c function loadTexture line 29 thread 0
-----------------------------------------------------
-  loaded=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 372 file src/main.c function loadTexture line 29 thread 0
-----------------------------------------------------
-  a=&'g' (00100111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 375 file src/main.c function loadTexture line 29 thread 0
-----------------------------------------------------
-  loaded=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 378 file src/main.c function loadTexture line 32 thread 0
-----------------------------------------------------
-  a=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
-
-State 379 file src/main.c function loadTexture line 32 thread 0
-----------------------------------------------------
-  b=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 382 file src/main.c function loadTexture line 32 thread 0
-----------------------------------------------------
-  newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 385 file src/main.c function loadTexture line 33 thread 0
-----------------------------------------------------
-  a=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 389 file src/main.c function loadSprite line 48 thread 0
-----------------------------------------------------
-  dynamic_object3.t=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 390 file src/main.c function loadSprite line 49 thread 0
-----------------------------------------------------
-  dynamic_object3.w=84 (00000000 00000000 00000000 01010100)
-
-State 391 file src/main.c function loadSprite line 50 thread 0
-----------------------------------------------------
-  dynamic_object3.h=83 (00000000 00000000 00000000 01010011)
-
-State 392 file src/main.c function loadSprite line 51 thread 0
-----------------------------------------------------
-  dynamic_object3.x=-708.486346 (11000000 10000110 00100011 11100100 00001001 01110011 01000111 11001000)
-
-State 393 file src/main.c function loadSprite line 52 thread 0
-----------------------------------------------------
-  dynamic_object3.y=768.0 (01000000 10001000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 394 file src/main.c function loadSprite line 53 thread 0
-----------------------------------------------------
-  dynamic_object3.theta=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
-
-State 395 file src/main.c function loadSprite line 54 thread 0
-----------------------------------------------------
-  dynamic_object3.dx=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 396 file src/main.c function loadSprite line 55 thread 0
-----------------------------------------------------
-  dynamic_object3.dy=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 397 file src/main.c function loadSprite line 56 thread 0
-----------------------------------------------------
-  dynamic_object3.omega=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 400 file src/main.c function spawnAsteroid line 122 thread 0
-----------------------------------------------------
-  a=&dynamic_object3 (00010000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 401 file src/main.c function spawnAsteroid line 123 thread 0
-----------------------------------------------------
-  dynamic_object3.dx=0.671937 (00111111 11100101 10000000 10000010 11100101 10101011 00000001 00000110)
-
-State 402 file src/main.c function spawnAsteroid line 124 thread 0
-----------------------------------------------------
-  dynamic_object3.dy=-2.561137e-9 (10111110 00100110 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 414 file src/main.c function spawnAsteroid line 125 thread 0
-----------------------------------------------------
-  dynamic_object3.omega=-0.0 (10000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 420 file src/main.c function ensureAsteroids line 149 thread 0
-----------------------------------------------------
-  st=&st!0@1 (00011101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 421 file src/main.c function ensureAsteroids line 149 thread 0
-----------------------------------------------------
-  s=&dynamic_object3 (00010000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 422 file src/main.c function addSprite line 63 thread 0
-----------------------------------------------------
-  head=((struct SpriteList { SpriteList *prev; SpriteList *next; Sprite *sprite; } *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 426 file src/main.c function addSprite line 63 thread 0
-----------------------------------------------------
-  malloc_size=24ul (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00011000)
-
-State 444 file src/main.c function addSprite line 63 thread 0
-----------------------------------------------------
-  head=&dynamic_object4 (00000011 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 445 file src/main.c function addSprite line 64 thread 0
-----------------------------------------------------
-  dynamic_object4.prev=((SpriteList *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 446 file src/main.c function addSprite line 65 thread 0
-----------------------------------------------------
-  dynamic_object4.next=((SpriteList *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 447 file src/main.c function addSprite line 66 thread 0
-----------------------------------------------------
-  dynamic_object4.sprite=&dynamic_object3 (00010000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 449 file src/main.c function addSprite line 68 thread 0
-----------------------------------------------------
-  st.sprites=&dynamic_object4 (00000011 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 457 file src/main.c function main line 673 thread 0
-----------------------------------------------------
-  quit=FALSE (00000000)
-
-State 458 file src/main.c function main line 673 thread 0
-----------------------------------------------------
-  quit=FALSE (00000000)
-
-State 460 file src/main.c function main line 677 thread 0
-----------------------------------------------------
-  start_time=0 (00000000 00000000 00000000 00000000)
-
-State 465 file src/main.c function main line 677 thread 0
-----------------------------------------------------
-  start_time=0 (00000000 00000000 00000000 00000000)
-
-State 466 file src/main.c function main line 680 thread 0
-----------------------------------------------------
-  e={ .type=0, .key={ .keysym={ .sym=0 } } } ({ 00000000 00000000 00000000 00000000, { { 00000000 00000000 00000000 00000000 } } })
-
-State 470 file src/main.c function main line 681 thread 0
-----------------------------------------------------
-  a=&e!0@1 (00101000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 471 file src/../headers/mockSDL.h function SDL_PollEvent line 52 thread 0
-----------------------------------------------------
-  e.type=100 (00000000 00000000 00000000 01100100)
-
-State 476 file src/main.c function main line 685 thread 0
-----------------------------------------------------
-  keys=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 479 file src/main.c function main line 685 thread 0
-----------------------------------------------------
-  a=NULL (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 482 file src/main.c function main line 685 thread 0
-----------------------------------------------------
-  keys=spoofKeystate (00101001 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 486 file src/main.c function main line 686 thread 0
-----------------------------------------------------
-  st=&st!0@1 (00011101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 487 file src/main.c function main line 686 thread 0
-----------------------------------------------------
-  keys=spoofKeystate (00101001 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 490 file src/main.c function updateGame line 528 thread 0
-----------------------------------------------------
-  st=&st!0@1 (00011101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 491 file src/main.c function updateGame line 528 thread 0
-----------------------------------------------------
-  keys=spoofKeystate (00101001 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 492 file src/main.c function moveShip line 358 thread 0
-----------------------------------------------------
-  s=((struct Sprite { signed int id; unsigned int $pad1; signed int *t; signed int w; signed int h; double x; double y; double theta; double dx; double dy; double omega; } *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 493 file src/main.c function moveShip line 358 thread 0
-----------------------------------------------------
-  s=&dynamic_object2 (00100110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 494 file src/main.c function moveShip line 361 thread 0
-----------------------------------------------------
-  thrust=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 495 file src/main.c function moveShip line 361 thread 0
-----------------------------------------------------
-  thrust=0.08 (00111111 10110100 01111010 11100001 01000111 10101110 00010100 01111011)
-
-State 496 file src/main.c function moveShip line 362 thread 0
-----------------------------------------------------
-  thrust_damp=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 497 file src/main.c function moveShip line 362 thread 0
-----------------------------------------------------
-  thrust_damp=0.99 (00111111 11101111 10101110 00010100 01111010 11100001 01000111 10101110)
-
-State 498 file src/main.c function moveShip line 363 thread 0
-----------------------------------------------------
-  torque=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 499 file src/main.c function moveShip line 363 thread 0
-----------------------------------------------------
-  torque=0.004 (00111111 01110000 01100010 01001101 11010010 11110001 10101001 11111100)
-
-State 500 file src/main.c function moveShip line 364 thread 0
-----------------------------------------------------
-  torque_damp=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 501 file src/main.c function moveShip line 364 thread 0
-----------------------------------------------------
-  torque_damp=0.95 (00111111 11101110 01100110 01100110 01100110 01100110 01100110 01100110)
-
-State 502 file src/main.c function moveShip line 367 thread 0
-----------------------------------------------------
-  dynamic_object2.dx=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 503 file src/main.c function moveShip line 368 thread 0
-----------------------------------------------------
-  dynamic_object2.dy=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 504 file src/main.c function moveShip line 369 thread 0
-----------------------------------------------------
-  dynamic_object2.omega=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 506 file src/main.c function moveShip line 373 thread 0
-----------------------------------------------------
-  st.thrust=TRUE (00000001)
-
-State 510 file src/main.c function moveShip line 374 thread 0
-----------------------------------------------------
-  x=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
-
-State 511 file <builtin-library-cos> function cos line 7 thread 0
-----------------------------------------------------
-  ret=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 512 file <builtin-library-cos> function cos line 7 thread 0
-----------------------------------------------------
-  ret=2.820079e-12 (00111101 10001000 11001110 01000000 11110110 00010011 00011101 11111010)
-
-State 520 file src/main.c function moveShip line 374 thread 0
-----------------------------------------------------
-  dynamic_object2.dx=2.256063e-13 (00111101 01001111 11000000 01010011 00100110 01111110 11011110 10110001)
-
-State 524 file src/main.c function moveShip line 375 thread 0
-----------------------------------------------------
-  x=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
-
-State 525 file <builtin-library-sin> function sin line 7 thread 0
-----------------------------------------------------
-  ret=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
-
-State 526 file <builtin-library-sin> function sin line 7 thread 0
-----------------------------------------------------
-  ret=-5.311244e-71 (10110001 01010111 01110101 11011100 00001101 01000100 00100011 11001011)
-
-State 534 file src/main.c function moveShip line 375 thread 0
-----------------------------------------------------
-  dynamic_object2.dy=4.248995e-72 (00110001 00011110 00000111 10000000 00010000 11111011 00001111 00011000)
-
-State 538 file src/main.c function moveShip line 388 thread 0
-----------------------------------------------------
-  dynamic_object2.x=502.0 (01000000 01111111 01100000 00000000 00000000 00000000 00000000 00000100)
-
-State 539 file src/main.c function moveShip line 389 thread 0
-----------------------------------------------------
-  dynamic_object2.y=374.0 (01000000 01110111 01100000 00000000 00000000 00000000 00000000 00000000)
-
-State 540 file src/main.c function moveShip line 390 thread 0
-----------------------------------------------------
-  dynamic_object2.theta=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
-
-State 545 file src/main.c function moveShip line 399 thread 0
-----------------------------------------------------
-  xOutOfBounds=FALSE (00000000)
-
-State 550 file src/main.c function moveShip line 399 thread 0
-----------------------------------------------------
-  xOutOfBounds=TRUE (00000001)
-
-State 551 file src/main.c function moveShip line 400 thread 0
-----------------------------------------------------
-  yOutOfBounds=FALSE (00000000)
-
-State 556 file src/main.c function moveShip line 400 thread 0
-----------------------------------------------------
-  yOutOfBounds=TRUE (00000001)
+--> src/main.c:723 main(1, argv')
+
+--> src/main.c:751 loadGame(&st!0@1)
+  193: ship_w=20 (00000000 00000000 00000000 00010100)
+  194: ship_h=20 (00000000 00000000 00000000 00010100)
+
+--> src/main.c:198 gettimeofday(&tm!0@1, NULL)
+<-|
+
+--> src/main.c:199 srand(2000000u)
+<-|
+
+--> src/main.c:202 SDL_Init(1)
+<-|
+
+--> src/main.c:205 SDL_CreateWindow(&'F', 20, 0, 1024, 768, 0)
+<-|
+  205: window=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
+
+--> src/main.c:209 SDL_CreateRenderer(((signed int *)NULL) + 1l, -1, 2)
+<-|
+  209: renderer=((signed int *)NULL) + 1l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001)
+
+--> src/main.c:213 SDL_SetRenderDrawColor(((signed int *)NULL) + 1l, 0, 0, 0, 0xFF)
+<-|
+
+--> src/main.c:216 TTF_Init()
+<-|
+
+--> src/main.c:217 TTF_OpenFont(&'g', 24)
+<-|
+  217: font=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:220 Mix_OpenAudio(44100, 6, 2, 2048)
+<-|
+
+--> src/main.c:223 Mix_LoadMUS(&'a')
+<-|
+  223: music=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:224 Mix_VolumeMusic(100)
+<-|
+
+--> src/main.c:225 Mix_PlayMusic(((signed int *)NULL), -1)
+<-|
+
+--> src/main.c:228 malloc(24ul)
+  228: sfx=dynamic_object1 (00010001 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:231 Mix_LoadWAV(&'a')
+<-|
+  231: dynamic_object1[0l]=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:232 Mix_LoadWAV(&'a')
+<-|
+  232: dynamic_object1[1l]=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:233 Mix_LoadWAV(&'a')
+<-|
+  233: dynamic_object1[2l]=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  236: c_x=502.0 (01000000 01111111 01100000 00000000 00000000 00000000 00000000 00000000)
+  237: c_y=374.0 (01000000 01110111 01100000 00000000 00000000 00000000 00000000 00000000)
+  238: nbb=2 (00000000 00000000 00000000 00000010)
+
+--> src/main.c:239 malloc(32ul)
+  239: bb=dynamic_object2 (00010101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  240: dynamic_object2[0l]={ .x=2, .y=2, .w=7, .h=16 } ({ 00000000 00000000 00000000 00000010, 00000000 00000000 00000000 00000010, 00000000 00000000 00000000 00000111, 00000000 00000000 00000000 00010000 })
+  241: dynamic_object2[1l]={ .x=4, .y=7, .w=16, .h=6 } ({ 00000000 00000000 00000000 00000100, 00000000 00000000 00000000 00000111, 00000000 00000000 00000000 00010000, 00000000 00000000 00000000 00000110 })
+  242: path=&'g' (00010110 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:243 loadSprite(3, 20, 20, 502.0, 374.0, 2, dynamic_object2, &'g')
+
+--> src/main.c:50 malloc(sizeof(Sprite) /*88ul*/ )
+  50: s=&dynamic_object3 (00010111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  51: dynamic_object3.id=3 (00000000 00000000 00000000 00000011)
+
+--> src/main.c:52 loadTexture(&'g')
+  31: newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:32 SDL_LoadBMP(&'g')
+<-|
+  32: loaded=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:35 SDL_CreateTextureFromSurface(((signed int *)NULL) + 1l, ((signed int *)NULL))
+<-|
+  35: newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:36 SDL_FreeSurface(((signed int *)NULL))
+<-|
+<-|
+  52: dynamic_object3.t=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  53: dynamic_object3.w=20 (00000000 00000000 00000000 00010100)
+  54: dynamic_object3.h=20 (00000000 00000000 00000000 00010100)
+  55: dynamic_object3.x=502.0 (01000000 01111111 01100000 00000000 00000000 00000000 00000000 00000000)
+  56: dynamic_object3.y=374.0 (01000000 01110111 01100000 00000000 00000000 00000000 00000000 00000000)
+  57: dynamic_object3.theta=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
+  58: dynamic_object3.dx=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  59: dynamic_object3.dy=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  60: dynamic_object3.omega=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  61: dynamic_object3.nbb=2 (00000000 00000000 00000000 00000010)
+  62: dynamic_object3.bb=dynamic_object2 (00010101 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+<-|
+  243: st.ship=&dynamic_object3 (00010111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  244: st.score=0l (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  245: st.laser_cooldown=0 (00000000 00000000 00000000 00000000)
+  246: st.thrust=FALSE (00000000)
+  249: st.sprites=((SpriteList *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:250 ensureAsteroids(&st!0@1)
+
+--> src/main.c:182 spawnAsteroid(&st!0@1)
+  82: a_w=84 (00000000 00000000 00000000 01010100)
+  83: a_h=83 (00000000 00000000 00000000 01010011)
+  87: ratio=1.333333 (00111111 11110101 01010101 01010101 01010101 01010101 01010101 01010101)
+  88: weighted_chance=0.666667 (00111111 11100101 01010101 01010101 01010101 01010101 01010101 01010101)
+  91: x=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  92: y=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:93 getRand()
+
+--> src/../headers/constants.h:53 rand()
+<-|
+<-|
+
+--> src/main.c:93 min(-0.0625, 3.0)
+<-|
+  93: dx=-0.0625 (10111111 10110000 00000000 00000000 00000000 10100000 00000000 00000000)
+
+--> src/main.c:94 getRand()
+
+--> src/../headers/constants.h:53 rand()
+<-|
+<-|
+
+--> src/main.c:94 min(-0.416504, 3.0)
+<-|
+  94: dy=-0.416504 (10111111 11011010 10101000 00000000 10011111 10110101 01010000 00000000)
+
+--> src/main.c:97 getRand()
+
+--> src/../headers/constants.h:53 rand()
+<-|
+<-|
+  97: where=0.835663 (00111111 11101010 10111101 10111111 10111111 11110101 01111011 01111111)
+
+--> src/main.c:121 getRand()
+
+--> src/../headers/constants.h:53 rand()
+<-|
+<-|
+  121: y=-670.282856 (11000000 10000100 11110010 01000011 01001001 11100000 01000100 10000111)
+  122: x=1024.0 (01000000 10010000 00000000 00000000 00000000 00000000 00000000 00000000)
+  123: dy=-0.208252 (10111111 11001010 10101000 00000000 10011111 10110101 01010000 00000000)
+  124: dx=0.0625 (00111111 10110000 00000000 00000000 00000000 10100000 00000000 00000000)
+  128: nbb=5 (00000000 00000000 00000000 00000101)
+
+--> src/main.c:129 malloc(80ul)
+  129: bb=dynamic_object4 (00011000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  130: dynamic_object4[0l]={ .x=41, .y=1, .w=29, .h=71 } ({ 00000000 00000000 00000000 00101001, 00000000 00000000 00000000 00000001, 00000000 00000000 00000000 00011101, 00000000 00000000 00000000 01000111 })
+  131: dynamic_object4[1l]={ .x=1, .y=18, .w=80, .h=23 } ({ 00000000 00000000 00000000 00000001, 00000000 00000000 00000000 00010010, 00000000 00000000 00000000 01010000, 00000000 00000000 00000000 00010111 })
+  132: dynamic_object4[2l]={ .x=16, .y=10, .w=34, .h=71 } ({ 00000000 00000000 00000000 00010000, 00000000 00000000 00000000 00001010, 00000000 00000000 00000000 00100010, 00000000 00000000 00000000 01000111 })
+  133: dynamic_object4[3l]={ .x=7, .y=42, .w=76, .h=15 } ({ 00000000 00000000 00000000 00000111, 00000000 00000000 00000000 00101010, 00000000 00000000 00000000 01001100, 00000000 00000000 00000000 00001111 })
+  134: dynamic_object4[4l]={ .x=73, .y=54, .w=6, .h=15 } ({ 00000000 00000000 00000000 01001001, 00000000 00000000 00000000 00110110, 00000000 00000000 00000000 00000110, 00000000 00000000 00000000 00001111 })
+  135: path=&'g' (00011001 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:136 loadSprite(0, 84, 83, 1024.0, -670.282856, 5, dynamic_object4, &'g')
+
+--> src/main.c:50 malloc(sizeof(Sprite) /*88ul*/ )
+  50: s=&dynamic_object5 (00011010 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  51: dynamic_object5.id=0 (00000000 00000000 00000000 00000000)
+
+--> src/main.c:52 loadTexture(&'g')
+  31: newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:32 SDL_LoadBMP(&'g')
+<-|
+  32: loaded=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:35 SDL_CreateTextureFromSurface(((signed int *)NULL) + 1l, ((signed int *)NULL))
+<-|
+  35: newTexture=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:36 SDL_FreeSurface(((signed int *)NULL))
+<-|
+<-|
+  52: dynamic_object5.t=((signed int *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  53: dynamic_object5.w=84 (00000000 00000000 00000000 01010100)
+  54: dynamic_object5.h=83 (00000000 00000000 00000000 01010011)
+  55: dynamic_object5.x=1024.0 (01000000 10010000 00000000 00000000 00000000 00000000 00000000 00000000)
+  56: dynamic_object5.y=-670.282856 (11000000 10000100 11110010 01000011 01001001 11100000 01000100 10000111)
+  57: dynamic_object5.theta=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
+  58: dynamic_object5.dx=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  59: dynamic_object5.dy=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  60: dynamic_object5.omega=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  61: dynamic_object5.nbb=5 (00000000 00000000 00000000 00000101)
+  62: dynamic_object5.bb=dynamic_object4 (00011000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+<-|
+  136: a=&dynamic_object5 (00011010 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  137: dynamic_object5.dx=0.0625 (00111111 10110000 00000000 00000000 00000000 10100000 00000000 00000000)
+  138: dynamic_object5.dy=-0.208252 (10111111 11001010 10101000 00000000 10011111 10110101 01010000 00000000)
+
+--> src/main.c:139 getRand()
+
+--> src/../headers/constants.h:53 rand()
+<-|
+<-|
+  139: dynamic_object5.omega=-0.0 (10000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+<-|
+
+--> src/main.c:182 addSprite(&st!0@1, &dynamic_object5)
+
+--> src/main.c:69 malloc(sizeof(signed int *) * 3ul /*24ul*/ )
+  69: head=&dynamic_object6 (00000011 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  70: dynamic_object6.prev=((SpriteList *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  71: dynamic_object6.next=((SpriteList *)NULL) (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  72: dynamic_object6.sprite=&dynamic_object5 (00011010 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  74: st.sprites=&dynamic_object6 (00000011 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+<-|
+<-|
+<-|
+  757: quit=FALSE (00000000)
+
+--> src/main.c:760 SDL_GetTicks()
+<-|
+  760: start_time=0 (00000000 00000000 00000000 00000000)
+
+--> src/main.c:764 SDL_PollEvent(&e!0@1)
+  52: e.type=100 (00000000 00000000 00000000 01100100)
+<-|
+
+--> src/main.c:768 SDL_GetKeyboardState(NULL)
+<-|
+  768: keys=spoofKeystate (00011100 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+
+--> src/main.c:769 updateGame(&st!0@1, spoofKeystate)
+
+--> src/main.c:581 moveShip(&st!0@1, spoofKeystate)
+  404: s=&dynamic_object3 (00010111 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  407: thrust=0.08 (00111111 10110100 01111010 11100001 01000111 10101110 00010100 01111011)
+  408: thrust_damp=0.99 (00111111 11101111 10101110 00010100 01111010 11100001 01000111 10101110)
+  409: torque=0.004 (00111111 01110000 01100010 01001101 11010010 11110001 10101001 11111100)
+  410: torque_damp=0.95 (00111111 11101110 01100110 01100110 01100110 01100110 01100110 01100110)
+  413: dynamic_object3.dx=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  414: dynamic_object3.dy=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  415: dynamic_object3.omega=0.0 (00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000)
+  419: st.thrust=TRUE (00000001)
+
+--> src/main.c:421 Mix_PlayChannel(-1, ((signed int *)NULL), -1)
+<-|
+  421: thrust_ch=0 (00000000 00000000 00000000 00000000)
+
+--> src/main.c:423 cos(1.570796)
+  7: ret=-8.494446e-154 (10100000 00100110 11000111 01000011 11101111 11011111 00011111 11110111)
+<-|
+  423: dynamic_object3.dx=-6.795557e-155 (10011111 11101101 00101000 00000101 00001010 00010011 01011100 00011110)
+
+--> src/main.c:424 sin(1.570796)
+  7: ret=2.278920e-153 (00100000 00111110 10001110 00101001 01100101 01111111 01000101 00110001)
+<-|
+  424: dynamic_object3.dy=-1.823136e-154 (10100000 00000011 10001110 00101110 11111001 01000111 00110110 10000110)
+  441: dynamic_object3.x=502.0 (01000000 01111111 01100000 00000000 00000000 00000000 00000000 00000000)
+  442: dynamic_object3.y=374.0 (01000000 01110111 01100000 00000000 00000000 00000000 00000000 00000000)
+  443: dynamic_object3.theta=1.570796 (00111111 11111001 00100001 11111011 01010100 01000100 00101101 00011000)
+  452: xOutOfBounds=TRUE (00000001)
+  453: yOutOfBounds=TRUE (00000001)
 
 Violated property:
-  file src/main.c function moveShip line 401 thread 0
+  file src/main.c function moveShip line 454 thread 0
   OOB
   !(xOutOfBounds != FALSE || yOutOfBounds != FALSE)
-
-** 1 of 22 failed (2 iterations)
-VERIFICATION FAILED
-  
 \end{verbatim}
