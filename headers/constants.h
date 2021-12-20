@@ -29,22 +29,6 @@
 enum sound_effects
 { SFX_LASER, SFX_CRASH, SFX_THRUST };
 
-// Mute the game's audio
-void setMute(void);
-
-// Start the game's main theme
-void startMusic(void);
-
-// Play a sound effect
-void playSoundEffect(int sfx_id);
-
-// Load audio elements
-void loadSound(void);
-
-// Free audio elements
-void freeSound(void);
-
-
 // Sprite ids
 enum sprite_ids
 { ASTER, FRAGMENT, LASER, SHIP };
