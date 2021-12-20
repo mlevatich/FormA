@@ -343,6 +343,45 @@ bool colliding(const Sprite* s1, const Sprite* s2)
 		for(int j = 0; j < s2->nbb; j++) {
 			int x2 = b2[j].x + s2->x;
 			int y2 = b2[j].y + s2->y;
+
+			// Positions of the points on the rectangles in space
+			int bb1[4][2] = { { x1, y1 }
+			                , { x1 + b1[i].w, y1 }
+			                , { x1, y1 + b1[i].h }
+							, { x1 + b1[i].w, y1 + b1[i].h } };
+			int bb2[4][2] = { { x2, y2 }
+			                , { x2 + b2[j].w, y2 }
+							, { x2, y2 + b2[j].h }
+							, { x2 + b2[j].w, y2 + b2[j].h } };
+
+			// Centers around which each point is rotated
+			double bb1_c[2] = { s1->x + s1->w / 2.0, s1->y + s1->h / 2.0 };
+			double bb2_c[2] = { s2->x + s2->w / 2.0, s2->y + s2->h / 2.0 };
+
+			// Rotated positions for every point
+			int r_bb1[4][2];
+			int r_bb2[4][2];
+			for(int k = 0; k < 4; k++) {
+				r_bb1[k][0] = bb1_c[0]
+				            + cos(s1->theta) * (bb1[k][0] - bb1_c[0])
+							- sin(s1->theta) * (bb1_c[1] - bb1[k][1]);
+				r_bb1[k][1] = bb1_c[1]
+				            - sin(s1->theta) * (bb1[k][0] - bb1_c[0])
+							- cos(s1->theta) * (bb1_c[1] - bb1[k][1]);
+				r_bb2[k][0] = bb2_c[0]
+				            + cos(s2->theta) * (bb2[k][0] - bb2_c[0])
+							- sin(s2->theta) * (bb2_c[1] - bb2[k][1]);
+				r_bb2[k][1] = bb2_c[1]
+				            - sin(s2->theta) * (bb2[k][0] - bb2_c[0])
+							- cos(s2->theta) * (bb2_c[1] - bb2[k][1]);
+			}
+
+			// Separating axis algorithm
+			// Get axes corresponding to b1[i] horizontal,
+			// b1[i] vertical, b2[j] horizontal, b2[j] vertical
+			// Project all points onto each axes and check for overlap, if any
+			// axis has no overlap, return true
+
 			bool x_aligned = (x1 < x2 + b2[j].w && x1 + b1[i].w > x2);
 			bool y_aligned = (y1 < y2 + b2[j].h && y1 + b1[i].h > y2);
 			if(x_aligned && y_aligned) {
@@ -647,29 +686,38 @@ bool updateGame(State* st, const Uint8* keys)
 void renderBounds(const Sprite* s)
 {
 	// For each box, render 4 lines to create the rectangle
-
 	SDL_Texture* tex = loadTexture("graphics/dbg.bmp");
 	SDL_Rect* bb = s->bb;
+	SDL_SetRenderDrawColor(renderer, 0, 0xFF, 0, 0xFF);
 	for(int i = 0; i < s->nbb; i++) {
-		// Line 1
-		SDL_Rect box = bb[i];
-		SDL_Rect clip = { 0, 0, box.w, 1 };
-		SDL_Rect quad = { s->x + box.x, s->y + box.y, box.w, 1 };
-		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
 
-		// Line 2
-		quad = (SDL_Rect) { s->x + box.x, s->y + box.y + box.h, box.w, 1 };
-		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+		// Positions of the points on the rectangle in space
+		int x1 = bb[i].x + s->x;
+		int y1 = bb[i].y + s->y;
+		int bb1[4][2] = { { x1, y1 }
+						, { x1 + bb[i].w, y1 }
+						, { x1, y1 + bb[i].h }
+						, { x1 + bb[i].w, y1 + bb[i].h } };
 
-		// Line 3
-		clip = (SDL_Rect) { 0, 0, 1, box.h };
-		quad = (SDL_Rect) { s->x + box.x, s->y + box.y, 1, box.h };
-		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+		// Center around which each point is rotated
+		double bb1_c[2] = { s->x + s->w / 2.0, s->y + s->h / 2.0 };
 
-		// Line 4
-		quad = (SDL_Rect) { s->x + box.x + box.w, s->y + box.y, 1, box.h };
-		SDL_RenderCopyEx(renderer, tex, &clip, &quad, 0, NULL, SDL_FLIP_NONE);
+		// Rotated positions for every point
+		double rb[4][2];
+		for(int k = 0; k < 4; k++) {
+			rb[k][0] = bb1_c[0]
+					 + cos(s->theta) * (bb1[k][0] - bb1_c[0])
+					 - sin(s->theta) * (bb1_c[1] - bb1[k][1]);
+			rb[k][1] = bb1_c[1]
+				     - sin(s->theta) * (bb1[k][0] - bb1_c[0])
+					 - cos(s->theta) * (bb1_c[1] - bb1[k][1]);
+		}
+        SDL_RenderDrawLine(renderer, rb[0][0], rb[0][1], rb[1][0], rb[1][1]);
+		SDL_RenderDrawLine(renderer, rb[1][0], rb[1][1], rb[3][0], rb[3][1]);
+		SDL_RenderDrawLine(renderer, rb[3][0], rb[3][1], rb[2][0], rb[2][1]);
+		SDL_RenderDrawLine(renderer, rb[2][0], rb[2][1], rb[0][0], rb[0][1]);
 	}
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
 	SDL_Rect clip = { 5, 5, 2, 2 };
 	SDL_Rect quad = { s->x, s->y, 2, 2 };

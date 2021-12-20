@@ -87,6 +87,7 @@ static inline void          Mix_ExpireChannel(int a, int b)                     
 static inline void          Mix_HaltChannel(int a)                                              {}
 static inline void          SDL_RenderClear(SDL_Renderer* a)                                    {}
 static inline void          SDL_RenderPresent(SDL_Renderer* a)                                  {}
+static inline void          SDL_RenderDrawLine(SDL_Renderer* a, int b, int c, int d, int e)     {}
 static inline void          SDL_RenderCopy(SDL_Renderer* a, SDL_Texture* b, void* c,
                                            SDL_Rect* d)                                         {}
 static inline void          SDL_RenderCopyEx(SDL_Renderer* a, SDL_Texture* b, SDL_Rect* c,
