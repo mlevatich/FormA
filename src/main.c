@@ -359,32 +359,68 @@ bool colliding(const Sprite* s1, const Sprite* s2)
 			double bb2_c[2] = { s2->x + s2->w / 2.0, s2->y + s2->h / 2.0 };
 
 			// Rotated positions for every point
-			int r_bb1[4][2];
-			int r_bb2[4][2];
+			double r_bb1[8];
+			double r_bb2[8];
 			for(int k = 0; k < 4; k++) {
-				r_bb1[k][0] = bb1_c[0]
-				            + cos(s1->theta) * (bb1[k][0] - bb1_c[0])
-							- sin(s1->theta) * (bb1_c[1] - bb1[k][1]);
-				r_bb1[k][1] = bb1_c[1]
-				            - sin(s1->theta) * (bb1[k][0] - bb1_c[0])
-							- cos(s1->theta) * (bb1_c[1] - bb1[k][1]);
-				r_bb2[k][0] = bb2_c[0]
-				            + cos(s2->theta) * (bb2[k][0] - bb2_c[0])
-							- sin(s2->theta) * (bb2_c[1] - bb2[k][1]);
-				r_bb2[k][1] = bb2_c[1]
-				            - sin(s2->theta) * (bb2[k][0] - bb2_c[0])
-							- cos(s2->theta) * (bb2_c[1] - bb2[k][1]);
+				r_bb1[k * 2 + 0] = bb1_c[0]
+				                 + cos(s1->theta) * (bb1[k][0] - bb1_c[0])
+							     - sin(s1->theta) * (bb1_c[1] - bb1[k][1]);
+				r_bb1[k * 2 + 1] = bb1_c[1]
+				                 - sin(s1->theta) * (bb1[k][0] - bb1_c[0])
+							     - cos(s1->theta) * (bb1_c[1] - bb1[k][1]);
+				r_bb2[k * 2 + 0] = bb2_c[0]
+				                 + cos(s2->theta) * (bb2[k][0] - bb2_c[0])
+							     - sin(s2->theta) * (bb2_c[1] - bb2[k][1]);
+				r_bb2[k * 2 + 1] = bb2_c[1]
+				                 - sin(s2->theta) * (bb2[k][0] - bb2_c[0])
+							     - cos(s2->theta) * (bb2_c[1] - bb2[k][1]);
 			}
 
 			// Separating axis algorithm
-			// Get axes corresponding to b1[i] horizontal,
-			// b1[i] vertical, b2[j] horizontal, b2[j] vertical
-			// Project all points onto each axes and check for overlap, if any
-			// axis has no overlap, return true
+			bool collision = true;
+			for(int k = 0; k < 4; k++) {
 
-			bool x_aligned = (x1 < x2 + b2[j].w && x1 + b1[i].w > x2);
-			bool y_aligned = (y1 < y2 + b2[j].h && y1 + b1[i].h > y2);
-			if(x_aligned && y_aligned) {
+				// Get axis vector and bounding box to check it against
+				double* axis_bb = &r_bb1[0];
+				double* other_bb = &r_bb2[0];
+				if(k >= 2) {
+					axis_bb = &r_bb2[0];
+					other_bb = &r_bb1[0];
+				}
+				double axis[4] = { axis_bb[0], axis_bb[1]
+					             , axis_bb[2], axis_bb[3] };
+		        if(k & 1) {
+					axis[2] = axis_bb[4];
+					axis[3] = axis_bb[5];
+				}
+
+				// Project each point in other_bb onto the axis to see if there
+				// is overlap. If there is, we can move on to the next axis. If
+				// there's an axis with no overlap, the boxes aren't colliding
+				bool overlap = false;
+				bool left = false;
+				bool right = false;
+				for(int x = 0; x < 4; x++) {
+					double dx = axis[2] - axis[0];
+    				double dy = axis[3] - axis[1];
+    				double proj = (other_bb[2 * x + 0] - axis[0]) * dx
+					            + (other_bb[2 * x + 1] - axis[1]) * dy;
+					bool proj_left = 0 <= proj;
+					bool proj_right = proj <= dx * dx + dy * dy;
+					if(proj_left) left = true;
+					if(proj_right) right = true;
+					if((!proj_left && !proj_right) || (left && right)) {
+						overlap = true;
+						break;
+					}
+				}
+				if(!overlap) {
+					collision = false;
+					break;
+				}
+			}
+
+			if(collision) {
 #ifdef CBMC
 				// Overapproximation
 				Circle circle1 = makeCircle(s1, max(s1->w, s1->h));
