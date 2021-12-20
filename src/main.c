@@ -225,7 +225,7 @@ bool loadGame(State* st)
 	Mix_OpenAudio(SAMPLE_RATE, MIX_DEFAULT_FORMAT, NUM_CHANNELS, CHUNK_SIZE);
 
 	// Load music and set volume
-	music = Mix_LoadMUS("audio/bg1.wav");
+	music = Mix_LoadMUS("audio/music.wav");
 	Mix_VolumeMusic(100);
 	Mix_PlayMusic(music, -1);
 
