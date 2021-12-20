@@ -1,6 +1,5 @@
 #include "../headers/constants.h"
 #include "../headers/forma.h"
-#include "../headers/asteroid.h"
 #include <assert.h>
 
 // Window, renderer, font, music

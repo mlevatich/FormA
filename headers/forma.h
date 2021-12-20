@@ -33,5 +33,12 @@ typedef struct Sprite
 }
 Sprite;
 
+struct SpriteList
+{
+	struct SpriteList* prev;
+	struct SpriteList* next;
+	Sprite* sprite;
+};
+typedef struct SpriteList SpriteList;
 
 #endif // FORMA
