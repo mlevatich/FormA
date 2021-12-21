@@ -795,7 +795,7 @@ void renderScore(long long score)
 // Render a bar representing the cooldown of the laser
 void renderCooldown(int cd)
 {
-	SDL_Texture* line = loadTexture("graphics/laser.bmp");
+	SDL_Texture* line = textures[LASER];
 	int w = 2;
 	int h = 12;
 	int y = 50;
@@ -805,7 +805,6 @@ void renderCooldown(int cd)
 		SDL_Rect dst = { x, y, w, h };
 		SDL_RenderCopyEx(renderer, line, &src, &dst, 180, NULL, SDL_FLIP_NONE);
 	}
-	SDL_DestroyTexture(line);
 }
 
 // Render a little flame behind the ship when it's accelerating
