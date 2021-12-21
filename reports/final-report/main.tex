@@ -79,8 +79,8 @@
         \textit{Asteroids}, entirely from scratch with an eye towards model
         checking through the whole development process. \Name{} surpasses the
         original game in features, and is comparable in scope to modern variants
-        found on the internet, complete with scoring, sound effects, music, six
-        degrees of freedom per sprite, and robust collision detection.
+        found on the internet, complete with scoring, sound effects, original
+        music, six degrees of freedom per sprite, and robust collision detection.
         Furthermore, we model-check a number of technically non-trivial and
         practically useful properties of the game using \cbmc{}, including
         properties not mentioned in our proposal, which we came up with during
@@ -108,7 +108,7 @@
         collision detection algorithms, as well as drafting the reports and
         presentation.
 
-\section{Implementation overview}
+\section{Game overview}
 
     \subsection{Development environment}
 
@@ -119,45 +119,133 @@
         interface to the keyboard, audio, and graphics hardware necessary to
         program a video game.
 
-    \subsection{Implementation details}
+        The assets for the game were drawn in GIMP, and the original music and
+        sound effects were created using FamiStudio.
 
-        In \Name{}, the player will use the arrow keys on the keyboard to
+    \subsection{The game}
+
+        In \Name{}, the player uses the arrow keys on the keyboard to
         control a ``spaceship''. The up arrow applies a force to the ship in the
         direction that it is facing, while the left and right arrows turn the
-        ship in place. This allows the player to navigate a 2D plane which wraps
-        around. Asteroids will spawn randomly outside of the boundaries of the
-        space with fixed velocities and the player must avoid them or shoot them
-        using the spacebar, which will fire a bullet in the direction the ship
-        is facing. Staying alive and shooting down asteroids increases the
-        player's score. Contact with an asteroid results in a game-over.
+        ship in place. This allows the player to navigate a 2D plane with six
+        degrees of freedom: x-position, y-position, x-velocity, y-velocity,
+        rotation, and angular velocity. The plane wraps around, so piloting the
+        ship off one edge of the screen will see it re-emerge on the other side.
 
-        Many of the game's central mechanics revolve around collision detection
-        and resolution.
+        Circular asteroids spawn randomly outside of the boundaries of the
+        space with random inward velocities. If the ship collides with an
+        asteroid, the game is over. If asteroids collide with each other, they
+        break into four fragments, which are still capable of destroying the
+        ship.
 
-        For collision detection, we will use an Axis-Aligned Bounding Box (AABB)
-        algorithm with fine-grained boxes. To enable fine-grained boxes, we may
-        also explore classical collision detection optimizations, which prune
-        the $n^2$ space of all potential collisions (one for each pair of
-        objects) into a set of \textit{candidate} collisions for objects which
-        are efficiently determined to be reasonably close
-        \cite{moore1988collision, palmer1995collision}. Should we implement any
-        optimizations, we will aim to use model checking to show that the
-        optimizations are correct; that is, they do not prune any collisions
-        which should have happened on a particular frame.
+        The player can press the spacebar to shoot a laser from the spaceship
+        in the direction the ship is facing. A bar in the top left of the
+        screen represents the "cooldown" time before the player can fire a laser
+        again. Lasers which collide with asteroids will break them into four
+        fragments, deleting the laser. Lasers which collide with asteroid
+        fragments delete both the fragment and the laser. In this way, the
+        player can clear space for themselves by carefully aiming laser shots.
 
-\section{Correctness Specification}
+        The player's performance is measured by a score in the top left of the
+        screen. The score increases passively each frame, so that they player
+        is rewarded for staying alive. The score also increases when the player
+        destroys asteroids with lasers, and this is the main mechanism for
+        gaining points. The score achieved is written to the console when the
+        player loses.
+
+        As the score increases, the difficulty of the game increases. The
+        maximum number of on-screen asteroids and their average velocity
+        increase linearly with the score. The cooldown of the ship's laser also
+        decreases, however, so the player can fire more lasers to deal with the
+        high number of asteroids and earn points faster.
+
+        The game can be launched in debug mode using the \texttt{-d} flag, which
+        slows down the game and renders both the bounding boxes used for
+        collision and the sprite origins.
+
+    \subsection{Core algorithms}
+
+        \subsubsection{Game loop}
+
+            We use the traditional game programming technique of a \textit{game
+            loop}, where the running program consists mainly of an infinite
+            loop, and each iteration of the loop represents one \textit{frame},
+            in which we read \textit{user input}, \textit{update} the game state
+            according to the input, and \textit{render} the game state to the
+            screen. This approach is amenable to model checking - all of the
+            code which renders the game state is abstracted away, and we write
+            properties which reason about the state struct and the transitions
+            occuring in the \textit{update} function, which is the only part of
+            the code that modifies the state.
+
+        \subsubsection{Collision detection}
+
+            The central algorithm of \Name{} is collision detection. We use a
+            traditional but highly precise algorithm in which each sprite in the
+            game is associated with an array of rectangles which tightly
+            approximate the shape of the sprite in local coordinates. On each
+            frame of the game, every pair of sprites is checked for collision;
+            For a single pair, every pair of bounding boxes (translated from
+            local coordinates), is checked for overlap.
+
+            This is typically done because checking whether two axis-aligned
+            rectangles overlap is extremely fast, but multiple rectangles
+            together can still closely approximate any shape. When sprites
+            rotate, however, as ours do, the bounding boxes must rotate with
+            them, and thus an arbitrary pair of bounding boxes is not
+            necessarily axis-aligned. In this case, to check whether the boxes
+            overlap, we compute the positions of the box corners rotated around
+            the sprite center, and make use of the Separating Axis Theorem,
+            which states that two convex objects do not overlap if there exists
+            an axis onto which the two objects' projections do not overlap. This
+            axis, if it exists, will be parallel to one of the objects' edges,
+            so for two bounding boxes, we have four candidate separating axes.
+            If any axis admits non-overlapping projections, the two boxes do
+            not touch, and if no pair of boxes touches for a given pair of
+            sprites, the sprites do not touch.
+
+            The many layers of this algorithm motivate a model checking approach
+            which gives the programmer confidence that the algorithm works as
+            intended (Section 3.1).
+
+            In our proposal, we set out to explore classical collision detection
+            optimizations such as bounding volume hierarchies (BVH), which prune
+            the $n^2$ space of all potential sprite collisions into a set of
+            \textit{candidate} collisions for objects which are efficiently
+            determined to be reasonably close \cite{moore1988collision,
+            palmer1995collision}. Unfortunately, we did not have time to pursue
+            these optimzations, but \Name{} is not computationally demanding
+            enough to need them; the game still runs without noticeable lag.
+
+\section{Correctness specification}
 \label{sec:properties}
 
-    We chose several CTL properties to check for our game.
-    The specifications changed and grew as we discovered what kinds of properties we can effectively check, and we came up with the following CTL formulas for model checking.
+    We chose several CTL properties to check for our game. The specifications
+    changed and grew as we discovered what kinds of properties we can
+    effectively check, and we came up with the following CTL formulas for model
+    checking.
 
-    \subsection{Collision Handling}
+    \subsection{Collision handling}
 
         $$AG(\forall obj. obj \neq ship \implies \lnot touching(obj,ship))$$
-        In practice, we had to approximate this property by having two separate collision handling checks: an \emph{underapproximation} and an \emph{overapproximation}.
-        This is detailed further in Section \ref{sec:collision}.
+        In practice, we had to approximate this property by having two separate
+        collision handling checks: an \emph{underapproximation} and an
+        \emph{overapproximation}. This is detailed further in Section
+        \ref{sec:collision}.
 
-    \subsection{Input Correspondance}
+        Collision Detection was the main property we were model checking.
+        \textcolor{red}{
+            TODO
+        }
+        \textcolor{blue}{
+            \begin{itemize}
+                \item Collision detection is hard
+                \item Overapproximation
+                \item Underapporximation
+            \end{itemize}
+        }
+
+    \subsection{Input correspondance}
 
         $AG(keydown(UP) \implies ship.fx = -sin(ship.theta) * ACCEL\_NORM
                         \land ship.fy = cos(ship.theta) * ACCEL\_NORM)$
@@ -168,126 +256,161 @@
 
         $AG(keydown(LEFT) \land keydown(RIGHT) \implies ship.omega = 0)$
 
-	\subsection{Asteroid Leaves Screen}
+	\subsection{Asteroid leaves screen}
 
 		\begin{align*}
 			AG((asteroid.x < 0 \lor end < asteroid.x) \land
 			(asteroid.y < 0 \lor end < asteroid.y))
 		\end{align*}
 
-    \subsection{Asteroids Always Exist}
+    \subsection{Asteroids always exist}
     \[AG(asteroids != NULL)\]
 
-    \subsection{Ship is Always in Screen}
+    \subsection{Ship is always in screen}
     \begin{gather*}
         -shipWidth \leq shipX \land shipX \leq SCREEN\_WIDTH + shipWidth \land \\
         -shipHeight \leq shipY \land shipY \leq SCREEN\_HEIGHT + shipHeight
     \end{gather*}
 
-    \subsection{Laser is Always Faster than Ship}
+    \subsection{Laser is always faster than ship}
     $$AG(shipVelocity~<~laserVelocity)$$
 
-\section{Verification Approach}
+\section{Verification and testing}
 
-    To verify our correctness specification (Section 3), we will use the C
-    Bounded Model Checker (CBMC). CBMC is capable of statically checking the
+    To verify our correctness specification (Section 3) and gain general
+    confidence in our implementation, we used the C Bounded Model Checker
+    (\cbmc{}), as well as \texttt{clang-tidy} and a handwritten debug mode in
+    which to play the game. CBMC is capable of statically checking the
     validity of assertions in a C program by unrolling paths through the
     program.
 
-    We plan to express the propositional logic formulas in our correctness
-    specification as assertions, preconditions, and postconditions, such that
-    CBMC can check them. These assertions will be invoked on every iteration of
-    the \textit{game loop}, such that from a zoomed-out perspective where each
-    frame of the game is a state transition, they can be viewed as AG() CTL
-    formulas.
+    We expressed the propositional logic formulas in our correctness
+    specification as assertions, preconditions, and postconditions in code, such
+    that CBMC could check them. These assertions are invoked on every iteration
+    of the \textit{game loop}, such that from a zoomed-out perspective where
+    each frame of the game is a state transition, they can be viewed as AG()
+    CTL formulas.
 
-	We plan to integrate CBMC as a developmental procedure, just like regression testing might be used in a software development cycle.
-	Creating the assertions themselves will help with the design process, and model checking will show that we have the correct implementation with respect to the specification.
+	We integrated CBMC as a developmental procedure, just like regression
+    testing might be used in a software development cycle. Creating the
+    assertions themselves helped with the design process, and model checking
+    gave confidence that we wrote the correct implementation with respect to the
+    specification.
 
-\subsection{Comparison with \texttt{clang-tidy}}
-We also employed the tool \texttt{clang-tidy} to catch possible bugs through static analysis.
-Most notably, it was able to show a null pointer dereference that we had in our code (Figure~\ref{fig:clang-tidy})
-\begin{figure}[h!]
-    \includegraphics[width=\linewidth]{clang-tidy.png}
-    \caption{Using \texttt{clang-tidy}}
-    \label{fig:clang-tidy}
-\end{figure}
+    \subsection{Debug mode}
 
-\subsection{Using \cbmc}
-\subsubsection{Creating interface API for \cbmc}
-In order to use \cbmc, we were forced to de-couple the implementation of our game with its graphical implementation.
-When we try to invoke \cbmc on the \texttt{SDL} library, even with the simplest code listing as below:
-\begin{verbatim}
-#include<SDL2/SDL.h>
-int main(){}
-\end{verbatim}
-results in an error as shown in Figure~\ref{fig:cbmc-sdl}, even though the code runs properly.
+        As part of our testing approach, we added a flag to the game which runs
+        it in debug mode. This allowed us to slow down the game and see
+        precisely when collisions happen, by rendering bounding boxes around
+        each sprite. Collision detection algorithms often suffer from small
+        errors which are not noticeable in normal fast-paced gameplay, so the
+        debug mode gave us visual intuition we needed that the algorithms are
+        correct.
 
-\begin{figure}[h!]
-    \includegraphics[width=\linewidth]{cbmc-sdl.png}
-    \caption{Error with SDL2 and CBMC}
-    \label{fig:cbmc-sdl}
-\end{figure}
+    \subsection{Comparison with \texttt{clang-tidy}}
 
-We decided to create a mock interface that has the same definitions of the library, without its implementations,
-since we were not interested in checking the correctness of the \texttt{SDL} library.
-A sample mock interface is shown in Figure~\ref{fig:mock-sdl}, where the SDL functions we use are all no-op functions or return \texttt{NULL}.
-This allowed us to decouple the implementation of SDL (which presumably has some errors in model checking against the default cbmc settings) and the actual implementation of our project.
+        We also employed the tool \texttt{clang-tidy} to catch possible bugs
+        through static analysis. Most notably, it was able to show a null
+        pointer dereference that we had in our code
+        (Figure~\ref{fig:clang-tidy}). This dereference surprisingly caused a
+        segmentation fault on some testing machines, but not others, so it
+        would have been a pernicious bug to track down without static analysis.
 
-\begin{figure}[h!]
-    \includegraphics[width=\linewidth]{mock-sdl.png}
-    \caption{MockSDL Interface}
-    \label{fig:mock-sdl}
-\end{figure}
+        \begin{figure}[h!]
+            \includegraphics[width=\linewidth]{clang-tidy.png}
+            \caption{Using \texttt{clang-tidy}}
+            \label{fig:clang-tidy}
+        \end{figure}
 
-\subsubsection{Writing good properties}
-We found that writing properties was actually difficult -- creating the specification of the project was a major problem.
-What property do we want to check in the game?
-We had to think of possible bugs that can happen in the game.
-What is the ``specification'' of the game?
+    \subsection{Using \cbmc{}}
 
-Ultimately, we were able to come up with several properties that we describe in Section~\ref{sec:properties}.
+        \subsubsection{Faking out \cbmc{} with NoSDL}
 
-\subsubsection{Limited size checking of BMC}
-As with all code, our codebase heavily relies on loops, and this exploded the size of our problem.
-Even when we ran loops with depth $2$, they were heavily nested and took more than ten minutes to run.
+            In order to use \cbmc, we were forced to de-couple the
+            implementation of our game with its graphical implementation.
+            When we try to invoke \cbmc on the \texttt{SDL} library, even with
+            the simplest code listing as below:
 
-This became even more an issue when we wanted to check for \emph{reachability properties}.
-When we wanted to check the property that ``every asteroid eventually leaves the screen,'' we could not write this reachability property directly, so we wanted to model check it for a large number of bounds, e.g. $100$.
-However, this made the automata size very large, and caused the model checker to run out of memory (Figure~\ref{fig:killed}).
-Eventually, we had to make do without adding this property into our check.
+            \begin{verbatim}
+            #include<SDL2/SDL.h>
+            int main(){}
+            \end{verbatim}
 
-\begin{figure}[h!]
-    \includegraphics[width=\linewidth]{killed.png}
-    \caption{Out of Memory}
-    \label{fig:killed}
-\end{figure}
+            We receive an error as shown in Figure~\ref{fig:cbmc-sdl}, even
+            though the code runs properly.
 
-Additionally, we wanted to check properties that are preserved across different functions calls (e.g. that the plane and the laser never collide), and so it was not always possible to instantiate environment assumptions for each function call.
+            \begin{figure}[h!]
+                \includegraphics[width=\linewidth]{cbmc-sdl.png}
+                \caption{Error with SDL2 and CBMC}
+                \label{fig:cbmc-sdl}
+            \end{figure}
 
+            We decided to create a mock interface that has the same definitions
+            of the library, without its implementations, since we were not
+            interested in checking the correctness of the \texttt{SDL} library.
+            A sample mock interface is shown in Figure~\ref{fig:mock-sdl}, where
+            the SDL functions we use are all no-op functions or return
+            \texttt{NULL}. This allowed us to decouple the implementation of
+            SDL (which presumably has some errors in model checking against the
+            default cbmc settings) and the actual implementation of our project.
 
-\subsubsection{Debugging long error traces}
-When we were able to find violations in our properties, we found that the counterexample traces that we found were very long.
-For instance, for checking that our ship was in bounds, we obtained a counterexample trace (cf. Appendix ~\ref{appendix:trace}) that was $199$ transitions long,
-This made debugging the property very difficult, even when using the \texttt{--compact-trace} option --
-although perhaps a subtle error that we would not have been able to obtain without formal verification.
+            \begin{figure}[h!]
+                \includegraphics[width=\linewidth]{mock-sdl.png}
+                \caption{MockSDL Interface}
+                \label{fig:mock-sdl}
+            \end{figure}
 
-\section{Collision Detection}
-\label{sec:collision}
-Collision Detection was the main property we were model checking.
-\textcolor{red}{
-    TODO
-}
-\textcolor{blue}{
-    \begin{itemize}
-        \item Collision detection is hard
-        \item Overapproximation
-        \item Underapporximation
-    \end{itemize}
-}
+        \subsubsection{Writing good properties}
+
+            We found that writing properties was actually difficult -- creating
+            the specification of the project was a major problem. What property
+            do we want to check in the game? We had to think of possible bugs
+            that can happen in the game. What is the ``specification'' of the
+            game?
+
+            Ultimately, we were able to come up with several properties that we
+            describe in Section~\ref{sec:properties}.
+
+        \subsubsection{Limited size checking of BMC}
+            As with all code, our codebase heavily relies on loops, and this
+            exploded the size of our problem. Even when we ran loops with depth
+            $2$, they were heavily nested and took more than ten minutes to run.
+
+            This became even more an issue when we wanted to check for
+            \emph{reachability properties}. When we wanted to check the property
+            that ``every asteroid eventually leaves the screen,'' we could not
+            write this reachability property directly, so we wanted to model
+            check it for a large number of bounds, e.g. $100$. However, this
+            made the automata size very large, and caused the model checker to
+            run out of memory (Figure~\ref{fig:killed}). Eventually, we had to
+            make do without adding this property into our check.
+
+            \begin{figure}[h!]
+                \includegraphics[width=\linewidth]{killed.png}
+                \caption{Out of Memory}
+                \label{fig:killed}
+            \end{figure}
+
+            Additionally, we wanted to check properties that are preserved
+            across different functions calls (e.g. that the plane and the laser
+            never collide), and so it was not always possible to instantiate
+            environment assumptions for each function call.
+
+        \subsubsection{Debugging long error traces}
+
+            When we were able to find violations in our properties, we found
+            that the counterexample traces that we found were very long. For
+            instance, for checking that our ship was in bounds, we obtained a
+            counterexample trace (cf. Appendix ~\ref{appendix:trace}) that was
+            $199$ transitions long, This made debugging the property very
+            difficult, even when using the \texttt{--compact-trace} option --
+            although it perhaps represents a subtle error that we would not have
+            been able to obtain without formal verification.
 
 \section{Presentation}
-The presentation can be accessed at the following link: \url{https://docs.google.com/presentation/d/1bMOITxPOLg-2RSm_nAAHFMOQ0pkXzM3FMqpCxDSlm5w/edit?usp=sharing}.
+
+    The presentation can be accessed at the following link:
+    \url{https://docs.google.com/presentation/d/1bMOITxPOLg-2RSm_nAAHFMOQ0pkXzM3FMqpCxDSlm5w/edit?usp=sharing}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{proposal}
