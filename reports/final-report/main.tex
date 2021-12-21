@@ -359,6 +359,17 @@
             used in our code, and encouraged us to minimize our interface with
             the library, a good coding practice in general.
 
+            The version of the game which uses this mock interface is accessible
+            as a makefile option (NoSDL). This version of the game still plays
+            the fully featured game of \Name{} (the virtual player always moves
+            forward and fires lasers until death). Since we did not implement
+            an AI player for the game, running \cbmc{} on this version does
+            raise doubts about whether property violations occuring later on in
+            the game (where only a skilled player could reach) would ever be
+            detected, but we did not have an easy answer to this quandary, since
+            writing an AI player is prohibitively difficult and beyond the scope
+            of this project.
+
             \begin{figure}[h!]
                 \includegraphics[width=\linewidth]{mock-sdl.png}
                 \caption{MockSDL Interface}
