@@ -717,11 +717,6 @@ bool updateGame(State* st, const Uint8* keys)
 	// Score goes up by 1 per frame
 	st->score++;
 
-
-	/* TODO: calculate that ship velocity is less than max velocity */
-#ifdef CBMC
-#endif // CBMC
-
 	return false;
 }
 
