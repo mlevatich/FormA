@@ -19,11 +19,11 @@
 \newcommand{\LTLnext}{\bigcirc}
 \newcommand{\Name}{\textit{FormA}\xspace}
 \newcommand{\cbmc}{\texttt{CBMC}}
+\newcommand{\sdl}{\texttt{SDL}}
 
 \title{COMS 6863 Final Project Status Report: \Name{}}
 \author{
     Max Levatich$^*$ \& Wonhyuk (Harry) Choi
-    \footnote{Both authors contributed equally to the project.}
 }
 \date{\today}
 
@@ -32,46 +32,94 @@
 
 \section{Introduction}
 
-    Our aim is to design, program, and verify via model-checking a lightweight
-	video game called \Name, \emph{Formal verified Asteroids}.
-	\Name is based loosely on the classic arcade
-    game \textit{Asteroids} \cite{asteroids}; the player controls a small
-    spaceship, viewed from a top-down perspective, and must avoid or shoot down
-    incoming asteroids from all directions. The player receives points based on
-    how many asteroids they destroy and how long they survive.
+    Our aim was to design, program, and verify via model-checking a lightweight
+	video game called \Name{}, \emph{Formal verified Asteroids}.
+	\Name is based loosely on the classic arcade game \textit{Asteroids}
+    \cite{asteroids}; the player controls a small spaceship, viewed from a
+    top-down perspective, and must avoid or shoot down incoming asteroids from
+    all directions.
 
-    \Name{} will be implemented in C, with the help of the low-level rendering
-    library SDL. We will use CBMC \cite{clarke2004tool} to model-check
-    certain properties of the game as we develop it, including collision
-    detection, collision resolution, and input correspondence. We will submit:
+    \Name{} is implemented in C, with the help of the low-level rendering and
+    audio library \sdl{}. We used \cbmc{} \cite{clarke2004tool} to model-check
+    certain properties of the game as we developed it, including memory safety,
+    collision pruning correctness, velocity limits, and sprite boundary zones.
 
-    \begin{enumerate}
-        \item{The game's code and assets}
-        \item{Build instructions, including how to invoke CBMC}
-        \item{A correctness specification of the properties checked}
-        \item{A final project report detailing our process}
-    \end{enumerate}
+    \subsection{Deliverables}
 
-\section{Game Overview}
+        We submit:
 
-    \subsection{Implementation}
+        \begin{enumerate}
+            \item{The game's code and assets}
+            \item{Build instructions, including how to invoke \cbmc{}}
+            \item{A final project report detailing our process and a correctness
+            specification of the properties checked}
+        \end{enumerate}
 
-        \Name{} is written in C (C11 standard) and depends on Simple DirectMedia
-        Layer 2.0 (SDL). SDL is a development library written in C which
-        provides a simple low-level interface to the keyboard, audio, and
-        graphics hardware necessary to program a video game. We will use CBMC
-        to model-check the game (see Section 4).
+        We also created demo videos of our gameplay, available in two versions:
 
-        We will use the traditional game programming technique of a \textit{game
-        loop} located in the main file, where each iteration of the loop
-        represents one \textit{frame}, in which we read user input, update the
-        game state, and render the game state to the screen. Modules and
-        functions will be designed specifically to provide a minimal interface
-        to the model-checked portions of our code. We aim to have verified
-        modules which encapsulate specific features of the game (e.g. collision
-        detection, keyboard input).
+        \begin{itemize}
+            \item The basic gameplay video, available at link \url{
+        			https://www.youtube.com/watch?v=PcLxyKBAmO4
+            }
+            \item The gameplay video with ``bounded boxes'' used for collision detection, available at link \url{
+        			https://www.youtube.com/watch?v=oIl8qvB_IzI
+            }
+        \end{itemize}
 
-    \subsection{Gameplay}
+        \begin{figure}[h!]
+            \includegraphics[width=\linewidth]{gameplay.png}
+            \caption{Screenshot of \Name{}}
+            \label{fig:gameplay}
+        \end{figure}
+
+    \subsection{Comparison with our proposal}
+
+        As we laid out in our project proposal, we successfully implemented
+        \Name{} (Figure~\ref{fig:gameplay}), a safe and finely tuned variant of
+        \textit{Asteroids}, entirely from scratch with an eye towards model
+        checking through the whole development process. \Name{} surpasses the
+        original game in features, and is comparable in scope to modern variants
+        found on the internet, complete with scoring, sound effects, music, six
+        degrees of freedom per sprite, and robust collision detection.
+        Furthermore, we model-check a number of technically non-trivial and
+        practically useful properties of the game using \cbmc{}, including
+        properties not mentioned in our proposal, which we came up with during
+        development. \cbmc{} and \texttt{clang-tidy}, paired with our other
+        testing approaches, allowed us to find subtle bugs in our
+        implementation, such as memory leaks and overly permissive collision
+        detection.
+
+        While the game as written is fully featured and fun to play, we were not
+        able to pursue the extensions discussed in our proposal, such as
+        non-fatal collisions with "bouncy" objects, or objects with their own
+        gravitational fields. While these features would certainly be cool, we
+        feel that \Name{} as written, coming in at 1000 lines of code, is
+        complex enough to present interesting model-checking challenges for
+        the purposes of CSEE 6863.
+
+    \subsection{Author contributions}
+
+        Both authors contributed equally to the project. Max focused
+        on writing the game loop and interfacing with SDL for graphics and
+        audio, and defining the \sdl{} interface for \texttt{mockSDL.h}. Harry
+        focused on determining appropriate logic formulas to verify,
+        implementing those formulas, and instrumenting our build to support
+        \cbmc{} and \texttt{clang-tidy}. Both authors worked on the core
+        collision detection algorithms, as well as drafting the reports and
+        presentation.
+
+\section{Implementation overview}
+
+    \subsection{Development environment}
+
+        \Name{} is written in C (C11 standard) and depends only on \cbmc{} and
+        Simple DirectMedia Layer 2.0 (\sdl{}), along with supplementary
+        extensions \texttt{SDL Mixer} and \texttt{SDL TTF}. \sdl{} is a
+        development library written in C which provides a simple low-level
+        interface to the keyboard, audio, and graphics hardware necessary to
+        program a video game.
+
+    \subsection{Implementation details}
 
         In \Name{}, the player will use the arrow keys on the keyboard to
         control a ``spaceship''. The up arrow applies a force to the ship in the
@@ -82,19 +130,6 @@
         using the spacebar, which will fire a bullet in the direction the ship
         is facing. Staying alive and shooting down asteroids increases the
         player's score. Contact with an asteroid results in a game-over.
-
-        % \begin{enumerate}
-        %     \item{Non-game-ending collisions with ``bouncy'' objects. This allows
-        %           us to model-check properties like conservation of momentum
-        %           (subject to energy dissipation).}
-        %     \item{Obstacle courses constructed out of ``planetary'' objects which
-        %           induce a gravitational field on the ship and asteroids. This
-        %           allows us to model check the proper application of the force
-        %           of gravity.}
-		% 	\item{``Lives'' and an ``invincibility'' mode after losing a life}
-        % \end{enumerate}
-
-    \subsection{Algorithms}
 
         Many of the game's central mechanics revolve around collision detection
         and resolution.
@@ -112,7 +147,7 @@
 
 \section{Correctness Specification}
 \label{sec:properties}
-    
+
     We chose several CTL properties to check for our game.
     The specifications changed and grew as we discovered what kinds of properties we can effectively check, and we came up with the following CTL formulas for model checking.
 
@@ -132,14 +167,14 @@
         $AG(keydown(RIGHT) \land \lnot keydown(LEFT) \implies ship.omega = -ANGULAR\_VEL)$
 
         $AG(keydown(LEFT) \land keydown(RIGHT) \implies ship.omega = 0)$
-	
+
 	\subsection{Asteroid Leaves Screen}
-	
+
 		\begin{align*}
-			AG((asteroid.x < 0 \lor end < asteroid.x) \land 
+			AG((asteroid.x < 0 \lor end < asteroid.x) \land
 			(asteroid.y < 0 \lor end < asteroid.y))
 		\end{align*}
-    
+
     \subsection{Asteroids Always Exist}
     \[AG(asteroids != NULL)\]
 
@@ -234,7 +269,7 @@ Additionally, we wanted to check properties that are preserved across different 
 \subsubsection{Debugging long error traces}
 When we were able to find violations in our properties, we found that the counterexample traces that we found were very long.
 For instance, for checking that our ship was in bounds, we obtained a counterexample trace (cf. Appendix ~\ref{appendix:trace}) that was $199$ transitions long,
-This made debugging the property very difficult, even when using the \texttt{--compact-trace} option -- 
+This made debugging the property very difficult, even when using the \texttt{--compact-trace} option --
 although perhaps a subtle error that we would not have been able to obtain without formal verification.
 
 \section{Collision Detection}
@@ -250,25 +285,6 @@ Collision Detection was the main property we were model checking.
         \item Underapporximation
     \end{itemize}
 }
-
-\section{Completed Project}
-The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
-
-\begin{figure}[h!]
-    \includegraphics[width=\linewidth]{gameplay.png}
-    \caption{Screenshot of \Name}
-    \label{fig:gameplay}
-\end{figure}
-
-We also created demo videos of our gameplay, available in two versions:
-\begin{itemize}
-    \item The basic gameplay video, available at link \url{
-			https://www.youtube.com/watch?v=PcLxyKBAmO4
-    }
-    \item The gameplay video with ``bounded boxes'' used for collision detection, available at link \url{
-			https://www.youtube.com/watch?v=oIl8qvB_IzI
-    }
-\end{itemize}
 
 \section{Presentation}
 The presentation can be accessed at the following link: \url{https://docs.google.com/presentation/d/1bMOITxPOLg-2RSm_nAAHFMOQ0pkXzM3FMqpCxDSlm5w/edit?usp=sharing}.
