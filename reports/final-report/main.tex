@@ -122,7 +122,9 @@
 
     \subsection{Collision Handling}
 
-        $AG(\forall obj. obj \neq ship \implies \lnot touching(obj,ship))$
+        $$AG(\forall obj. obj \neq ship \implies \lnot touching(obj,ship))$$
+        In practice, we had to approximate this property by having two separate collision handling checks: an \emph{underapproximation} and an \emph{overapproximation}.
+        This is detailed further in \ref{sec:collision}.
 
     \subsection{Input Correspondance}
 
@@ -227,7 +229,18 @@ This made debugging the property very difficult, even when using the \texttt{--c
 although perhaps a subtle error that we would not have been able to obtain without formal verification.
 
 \section{Collision Detection}
+\label{sec:collision}
 Collision Detection was the main property we were model checking.
+\textcolor{red}{
+    TODO
+}
+\textcolor{blue}{
+    \begin{itemize}
+        \item Collision detection is hard
+        \item Overapproximation
+        \item Underapporximation
+    \end{itemize}
+}
 
 \section{Completed Project}
 The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
@@ -237,6 +250,16 @@ The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids th
     \caption{Screenshot of \Name}
     \label{fig:gameplay}
 \end{figure}
+
+We also created demo videos of our gameplay, available in two versions:
+\begin{itemize}
+    \item The basic gameplay video, available at link \url{
+			https://www.youtube.com/watch?v=PcLxyKBAmO4
+    }
+    \item The gameplay video with ``bounded boxes'' used for collision detection, available at link \url{
+			https://www.youtube.com/watch?v=oIl8qvB_IzI
+    }
+\end{itemize}
 
 \section{Presentation}
 The presentation can be accessed at the following link: \url{https://docs.google.com/presentation/d/1bMOITxPOLg-2RSm_nAAHFMOQ0pkXzM3FMqpCxDSlm5w/edit?usp=sharing}.
