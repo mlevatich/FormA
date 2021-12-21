@@ -44,9 +44,9 @@ SDL_Texture* loadTexture(const char* path)
 }
 
 // Play a sound effect
-void playSfx(int sfx_id)
+void playSfx(int sfx_id, int dur)
 {
-	Mix_ExpireChannel(Mix_PlayChannel(-1, sfx[sfx_id], 0), 300);
+	Mix_ExpireChannel(Mix_PlayChannel(-1, sfx[sfx_id], 0), dur);
 }
 
 // Load new sprite into the game
@@ -486,7 +486,7 @@ bool detectAllCollisions(State* st)
 					&& colliding(s1, s2) && !delete[i] && !delete[j]) {
 				delete[i] = true;
 				delete[j] = true;
-				playSfx(SFX_CRASH);
+				playSfx(SFX_CRASH, 200);
 				if (laserHit) {
 					st->score += 50;
 				}
@@ -671,7 +671,7 @@ void fireLaser(State* st)
 	addSprite(st, lz);
 
 	// Laser sound effect
-	playSfx(SFX_LASER);
+	playSfx(SFX_LASER, 250);
 
 	/* Ship is never faster than the laser. */
 	/* What a terrible engineering feat it would be if this were true! */
