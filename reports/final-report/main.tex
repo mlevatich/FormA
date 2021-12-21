@@ -114,6 +114,7 @@
         which should have happened on a particular frame.
 
 \section{Correctness Specification}
+\label{sec:properties}
 
     Our specification will change and grow as we develop the game and discover
     what kinds of properties we can effectively check. Here are some initial CTL
@@ -143,6 +144,15 @@
     
     \subsection{Asteroids Always Exist}
     \[AG(asteroids != NULL)\]
+
+    \subsection{Ship is Always in Screen}
+    \begin{gather*}
+        -shipWidth \leq shipX \land shipX \leq SCREEN\_WIDTH + shipWidth \land \\
+        -shipHeight \leq shipY \land shipY \leq SCREEN\_HEIGHT + shipHeight
+    \end{gather*}
+
+    \subsection{Laser is Always Faster than Ship}
+    $$AG(shipVelocity~<~laserVelocity)$$
 
 \section{Verification Approach}
 
@@ -191,7 +201,11 @@ since we were not interested in checking the correctness of the \texttt{SDL} lib
 
 \subsubsection{Writing good properties}
 We found that writing properties was actually difficult -- creating the specification of the project was a major problem.
+What property do we want to check in the game?
+We had to think of possible bugs that can happen in the game.
+What is the ``specification'' of the game?
 
+Ultimately, we were able to come up with several properties that we describe in Section~\ref{sec:properties}.
 
 \subsubsection{Limited size checking of BMC}
 As with all code, our codebase heavily relies on loops, and this exploded the size of our problem.
@@ -211,6 +225,9 @@ When we were able to find violations in our properties, we found that the counte
 For instance, for checking that our ship was in bounds, we obtained a counterexample trace (cf. Appendix ~\ref{appendix:trace}) that was $199$ transitions long,
 This made debugging the property very difficult, even when using the \texttt{--compact-trace} option -- 
 although perhaps a subtle error that we would not have been able to obtain without formal verification.
+
+\section{Collision Detection}
+Collision Detection was the main property we were model checking.
 
 \section{Completed Project}
 The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
