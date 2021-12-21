@@ -83,19 +83,16 @@
         is facing. Staying alive and shooting down asteroids increases the
         player's score. Contact with an asteroid results in a game-over.
 
-        We are entertaining extensions to this core game which provide more
-        interesting properties for us to model check, including:
-
-        \begin{enumerate}
-            \item{Non-game-ending collisions with ``bouncy'' objects. This allows
-                  us to model-check properties like conservation of momentum
-                  (subject to energy dissipation).}
-            \item{Obstacle courses constructed out of ``planetary'' objects which
-                  induce a gravitational field on the ship and asteroids. This
-                  allows us to model check the proper application of the force
-                  of gravity.}
-			\item{``Lives'' and an ``invincibility'' mode after losing a life}
-        \end{enumerate}
+        % \begin{enumerate}
+        %     \item{Non-game-ending collisions with ``bouncy'' objects. This allows
+        %           us to model-check properties like conservation of momentum
+        %           (subject to energy dissipation).}
+        %     \item{Obstacle courses constructed out of ``planetary'' objects which
+        %           induce a gravitational field on the ship and asteroids. This
+        %           allows us to model check the proper application of the force
+        %           of gravity.}
+		% 	\item{``Lives'' and an ``invincibility'' mode after losing a life}
+        % \end{enumerate}
 
     \subsection{Algorithms}
 
@@ -114,14 +111,16 @@
         which should have happened on a particular frame.
 
 \section{Correctness Specification}
-
-    Our specification will change and grow as we develop the game and discover
-    what kinds of properties we can effectively check. Here are some initial CTL
-    formulas we plan to check.
+\label{sec:properties}
+    
+    We chose several CTL properties to check for our game.
+    The specifications changed and grew as we discovered what kinds of properties we can effectively check, and we came up with the following CTL formulas for model checking.
 
     \subsection{Collision Handling}
 
-        $AG(\forall obj. obj \neq ship \implies \lnot touching(obj,ship))$
+        $$AG(\forall obj. obj \neq ship \implies \lnot touching(obj,ship))$$
+        In practice, we had to approximate this property by having two separate collision handling checks: an \emph{underapproximation} and an \emph{overapproximation}.
+        This is detailed further in Section \ref{sec:collision}.
 
     \subsection{Input Correspondance}
 
@@ -143,6 +142,15 @@
     
     \subsection{Asteroids Always Exist}
     \[AG(asteroids != NULL)\]
+
+    \subsection{Ship is Always in Screen}
+    \begin{gather*}
+        -shipWidth \leq shipX \land shipX \leq SCREEN\_WIDTH + shipWidth \land \\
+        -shipHeight \leq shipY \land shipY \leq SCREEN\_HEIGHT + shipHeight
+    \end{gather*}
+
+    \subsection{Laser is Always Faster than Ship}
+    $$AG(shipVelocity~<~laserVelocity)$$
 
 \section{Verification Approach}
 
@@ -188,15 +196,32 @@ results in an error as shown in Figure~\ref{fig:cbmc-sdl}, even though the code 
 
 We decided to create a mock interface that has the same definitions of the library, without its implementations,
 since we were not interested in checking the correctness of the \texttt{SDL} library.
+A sample mock interface is shown in Figure~\ref{fig:mock-sdl}, where the SDL functions we use are all no-op functions or return \texttt{NULL}.
+This allowed us to decouple the implementation of SDL (which presumably has some errors in model checking against the default cbmc settings) and the actual implementation of our project.
+
+\begin{figure}[h!]
+    \includegraphics[width=\linewidth]{mock-sdl.png}
+    \caption{MockSDL Interface}
+    \label{fig:mock-sdl}
+\end{figure}
 
 \subsubsection{Writing good properties}
 We found that writing properties was actually difficult -- creating the specification of the project was a major problem.
+What property do we want to check in the game?
+We had to think of possible bugs that can happen in the game.
+What is the ``specification'' of the game?
 
+Ultimately, we were able to come up with several properties that we describe in Section~\ref{sec:properties}.
 
 \subsubsection{Limited size checking of BMC}
 As with all code, our codebase heavily relies on loops, and this exploded the size of our problem.
 Even when we ran loops with depth $2$, they were heavily nested and took more than ten minutes to run.
-Without the stipulation, our computers ran out of memory to compute the entire state-space (Figure~\ref{fig:killed}).
+
+This became even more an issue when we wanted to check for \emph{reachability properties}.
+When we wanted to check the property that ``every asteroid eventually leaves the screen,'' we could not write this reachability property directly, so we wanted to model check it for a large number of bounds, e.g. $100$.
+However, this made the automata size very large, and caused the model checker to run out of memory (Figure~\ref{fig:killed}).
+Eventually, we had to make do without adding this property into our check.
+
 \begin{figure}[h!]
     \includegraphics[width=\linewidth]{killed.png}
     \caption{Out of Memory}
@@ -212,6 +237,20 @@ For instance, for checking that our ship was in bounds, we obtained a counterexa
 This made debugging the property very difficult, even when using the \texttt{--compact-trace} option -- 
 although perhaps a subtle error that we would not have been able to obtain without formal verification.
 
+\section{Collision Detection}
+\label{sec:collision}
+Collision Detection was the main property we were model checking.
+\textcolor{red}{
+    TODO
+}
+\textcolor{blue}{
+    \begin{itemize}
+        \item Collision detection is hard
+        \item Overapproximation
+        \item Underapporximation
+    \end{itemize}
+}
+
 \section{Completed Project}
 The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids that move around according to the laws of physics (i.e. velocity and acceleration).
 
@@ -220,6 +259,16 @@ The completed game (Figure~\ref{fig:gameplay}) involves a plane and asteroids th
     \caption{Screenshot of \Name}
     \label{fig:gameplay}
 \end{figure}
+
+We also created demo videos of our gameplay, available in two versions:
+\begin{itemize}
+    \item The basic gameplay video, available at link \url{
+			https://www.youtube.com/watch?v=PcLxyKBAmO4
+    }
+    \item The gameplay video with ``bounded boxes'' used for collision detection, available at link \url{
+			https://www.youtube.com/watch?v=oIl8qvB_IzI
+    }
+\end{itemize}
 
 \section{Presentation}
 The presentation can be accessed at the following link: \url{https://docs.google.com/presentation/d/1bMOITxPOLg-2RSm_nAAHFMOQ0pkXzM3FMqpCxDSlm5w/edit?usp=sharing}.
