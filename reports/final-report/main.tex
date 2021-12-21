@@ -326,9 +326,9 @@
 
         \subsubsection{Faking out \cbmc{} with NoSDL}
 
-            In order to use \cbmc, we were forced to de-couple the
+            In order to use \cbmc{}, we were forced to de-couple the
             implementation of our game with its graphical implementation.
-            When we try to invoke \cbmc on the \texttt{SDL} library, even with
+            When we try to invoke \cbmc{} on the \sdl{} library, even with
             the simplest code listing as below:
 
             \begin{verbatim}
@@ -346,13 +346,18 @@
             \end{figure}
 
             We decided to create a mock interface that has the same definitions
-            of the library, without its implementations, since we were not
-            interested in checking the correctness of the \texttt{SDL} library.
+            of the library, without their implementations, since we were not
+            interested in checking the correctness of the \sdl{}.
             A sample mock interface is shown in Figure~\ref{fig:mock-sdl}, where
             the SDL functions we use are all no-op functions or return
             \texttt{NULL}. This allowed us to decouple the implementation of
             SDL (which presumably has some errors in model checking against the
-            default cbmc settings) and the actual implementation of our project.
+            default \cbmc{} settings) and the actual implementation of our
+            project.
+
+            It additionally helped us to clarify which pieces of SDL were being
+            used in our code, and encouraged us to minimize our interface with
+            the library, a good coding practice in general.
 
             \begin{figure}[h!]
                 \includegraphics[width=\linewidth]{mock-sdl.png}
