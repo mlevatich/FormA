@@ -9,6 +9,7 @@ TTF_Font* font = NULL;
 Mix_Music* music = NULL;
 Mix_Chunk** sfx = NULL;
 Mix_Chunk* thrust_sfx = NULL;
+SDL_Texture** textures = NULL;
 int thrust_ch = -1;
 bool debug = false;
 
@@ -50,11 +51,11 @@ void playSfx(int sfx_id)
 
 // Load new sprite into the game
 Sprite* loadSprite(int id, int w, int h, double x, double y,
-		int nbb, SDL_Rect* bb, const char* path)
+		int nbb, SDL_Rect* bb)
 {
 	Sprite* s = malloc(sizeof(Sprite));
 	s->id = id;
-	s->t = loadTexture(path);
+	s->t = textures[id];
 	s->w = w;
 	s->h = h;
 	s->x = x;
@@ -137,8 +138,7 @@ Sprite* spawnAsteroid(State* st)
 	bb[2] = (SDL_Rect) { 16, 10, 34, 71 };
 	bb[3] = (SDL_Rect) { 7, 42, 76, 15 };
 	bb[4] = (SDL_Rect) { 73, 54, 6, 15 };
-	const char* path = "graphics/asteroid.bmp";
-	Sprite* a = loadSprite(ASTER, a_w, a_h, x, y, nbb, bb, path);
+	Sprite* a = loadSprite(ASTER, a_w, a_h, x, y, nbb, bb);
 	a->dx = dx;
 	a->dy = dy;
 	a->omega = ((getRand() * 0.1) - 0.05) * st->score / 16000.0;
@@ -158,8 +158,7 @@ void breakAsteroid(State* st, Sprite* a)
 		bb[1] = (SDL_Rect) { 1, 33, 38, 8 };
 		bb[2] = (SDL_Rect) { 37, 2, 7, 19 };
 		bb[3] = (SDL_Rect) { 19, 9, 19, 5 };
-		const char* path = "graphics/fragment.bmp";
-		Sprite* f = loadSprite(FRAGMENT, w, h, x, y, nbb, bb, path);
+		Sprite* f = loadSprite(FRAGMENT, w, h, x, y, nbb, bb);
 		f->dx = a->dx * (1 + getRand() * 0.2 - 0.1);
 		f->dy = a->dy * (1 + getRand() * 0.2 - 0.1);
 		if(i >= 2) {
@@ -217,6 +216,13 @@ bool loadGame(State* st)
 	// Initialize renderer color and image loading
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
+	// Textures
+	textures = malloc(sizeof(SDL_Texture*) * NUM_SPRITES);
+	textures[ASTER]    = loadTexture("graphics/asteroid.bmp");
+	textures[FRAGMENT] = loadTexture("graphics/fragment.bmp");
+	textures[LASER]    = loadTexture("graphics/laser.bmp");
+	textures[SHIP]     = loadTexture("graphics/ship.bmp");
+
 	// Font library
 	TTF_Init();
 	font = TTF_OpenFont("graphics/basis33.ttf", 24);
@@ -233,8 +239,8 @@ bool loadGame(State* st)
 	sfx = (Mix_Chunk**) malloc(sizeof(Mix_Chunk*) * NUM_SFX);
 
 	// Sound effects
-	sfx[SFX_LASER] = Mix_LoadWAV("audio/laser.wav");
-	sfx[SFX_CRASH] = Mix_LoadWAV("audio/crash.wav");
+	sfx[SFX_LASER]  = Mix_LoadWAV("audio/laser.wav");
+	sfx[SFX_CRASH]  = Mix_LoadWAV("audio/crash.wav");
 	sfx[SFX_THRUST] = Mix_LoadWAV("audio/thrust.wav");
 
 	// Initial state
@@ -244,8 +250,7 @@ bool loadGame(State* st)
 	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
 	bb[0] = (SDL_Rect) { 2, 2, 7, 16 };
 	bb[1] = (SDL_Rect) { 4, 7, 16, 6 };
-	const char* path = "graphics/ship.bmp";
-	st->ship = loadSprite(SHIP, ship_w, ship_h, c_x, c_y, nbb, bb, path);
+	st->ship = loadSprite(SHIP, ship_w, ship_h, c_x, c_y, nbb, bb);
 	st->score = 0;
 	st->laser_cooldown = 0;
 	st->thrust = false;
@@ -260,7 +265,6 @@ bool loadGame(State* st)
 // Destroy a sprite
 void unloadSprite(Sprite* s)
 {
-	SDL_DestroyTexture(s->t);
 	free(s->bb);
 	free(s);
 }
@@ -295,6 +299,10 @@ void quitGame(State* st)
 	// Free renderer and window
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+
+	// Free textures
+	for(int i = 0; i < NUM_SPRITES; i++) SDL_DestroyTexture(textures[i]);
+	free(textures);
 
 	// Free font elements
 	TTF_CloseFont(font);
@@ -654,8 +662,7 @@ void fireLaser(State* st)
 	int nbb = 1;
 	SDL_Rect* bb = malloc(sizeof(SDL_Rect) * nbb);
 	bb[0] = (SDL_Rect) { 0, 0, 2, 12 };
-	const char* path = "graphics/laser.bmp";
-	Sprite* lz = loadSprite(LASER, l_w, l_h, l_x, l_y, nbb, bb, path);
+	Sprite* lz = loadSprite(LASER, l_w, l_h, l_x, l_y, nbb, bb);
 	lz->theta = t + M_PI_2;
 	lz->dx = l_v *  cos(t);
 	lz->dy = l_v * -sin(t);

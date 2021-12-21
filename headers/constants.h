@@ -29,6 +29,8 @@
 enum sound_effects
 { SFX_LASER, SFX_CRASH, SFX_THRUST };
 
+#define NUM_SPRITES 4
+
 // Sprite ids
 enum sprite_ids
 { ASTER, FRAGMENT, LASER, SHIP };
