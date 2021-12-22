@@ -228,22 +228,35 @@
     \subsection{Collision handling}
 
         $$AG(\forall obj. obj \neq ship \implies \lnot touching(obj,ship))$$
-        In practice, we had to approximate this property by having two separate
-        collision handling checks: an \emph{underapproximation} and an
-        \emph{overapproximation}. This is detailed further in Section
-        \ref{sec:collision}.
 
-        Collision Detection was the main property we were model checking.
-        \textcolor{red}{
-            TODO
-        }
-        \textcolor{blue}{
-            \begin{itemize}
-                \item Collision detection is hard
-                \item Overapproximation
-                \item Underapporximation
-            \end{itemize}
-        }
+        In practice, we had to approximate this property. Safety properties
+        are only useful in so far as they provide an intuition to the programmer
+        that something that should not happen is not happening. But because of
+        the complexity of the separating axis algorithm, it is not useful to
+        describe the complete accuracy of collision detection as a property -
+        the property is as likely to contain errors as the implementation.
+
+        We solved this using an approximation. We have two separate
+        collision handling checks: an \emph{underapproximation} and an
+        \emph{overapproximation}.
+
+        As an overapproximation, we want to check that two sprites which are
+        not close to each other never collide. To solve this, we check that
+        if two sprites are determined to collide, then bounding spheres with
+        radii of the larger of the sprites' widths and heights also collide.
+        These spheres are guaranteed to encompass the entire sprite drawing and
+        its bounding boxes, but still reasonably approximate the shape of the
+        sprite. This property is simple to express, and gives us confidence
+        that sprites will never collide unless they are actually fairly close
+        to each other, without delving into the messy underbelly of the
+        separating axis algorithm.
+
+        As an underapproximation, we want to check that two sprites that
+        visually overlap will be determined to collide. We take the same
+        approach as above, using a spherical underapproximation which is
+        contained entirely within the visual shape of the sprite. We check that
+        if two spherical underapproximations collide, our collision detection
+        algorithm must also report that they collide.
 
     \subsection{Input correspondance}
 
