@@ -43,8 +43,8 @@ static Uint8 spoofKeystate[3] = { 1, 0, 1 };
 
 // 0 indicates success
 static inline int           SDL_Init(int a)                                                     { return 0; }
-static inline int           TTF_Init()                                                          { return 0; }
-static inline int           SDL_GetTicks()                                                      { return 0; }
+static inline int           TTF_Init(void)                                                      { return 0; }
+static inline int           SDL_GetTicks(void)                                                  { return 0; }
 static inline int           Mix_PlayChannel(int a, Mix_Chunk* b, int c)                         { return 0; }
 
 // SDL_PollEvent must return 0 and set the event type to
@@ -68,9 +68,9 @@ static inline Mix_Chunk*    Mix_LoadWAV(const char* a)                          
 static inline SDL_Surface*  TTF_RenderText_Solid(TTF_Font* a, const char* b, SDL_Color c)       { return NULL; }
 
 // No-op functions
-static inline void          SDL_Quit()                                                          {}
-static inline void          TTF_Quit()                                                          {}
-static inline void          Mix_Quit()                                                          {}
+static inline void          SDL_Quit(void)                                                      {}
+static inline void          TTF_Quit(void)                                                      {}
+static inline void          Mix_Quit(void)                                                      {}
 static inline void          SDL_Delay(int a)                                                    {}
 static inline void          SDL_SetRenderDrawColor(SDL_Renderer* a, int b, int c, int d, int e) {}
 static inline void          SDL_FreeSurface(SDL_Surface* a)                                     {}

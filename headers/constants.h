@@ -36,7 +36,7 @@ enum sprite_ids
 { ASTER, FRAGMENT, LASER, SHIP };
 
 // Get random number in [0, 1)
-static inline double getRand() { return (double) rand() / (double) RAND_MAX; }
+static inline double getRand(void) { return (double) rand() / (double) RAND_MAX; }
 
 // Max and min
 static inline double max(double a, double b) { if(a > b) return a; return b; }

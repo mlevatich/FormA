@@ -20,7 +20,7 @@ typedef struct State
 	Sprite* ship;
 	int laser_cooldown;
 	bool thrust;
-	SpriteList* sprites; // linked list of active sprites
+	SpriteList* sprites;
 }
 State;
 
@@ -441,8 +441,8 @@ bool colliding(const Sprite* s1, const Sprite* s2)
 	}
 #ifdef CBMC
 	// Underapproximation
-	Circle circle1 = makeCircle(s1, min(s1->w, s1->h));
-	Circle circle2 = makeCircle(s2, min(s2->w, s2->h));
+	Circle circle1 = makeCircle(s1, s1->r);
+	Circle circle2 = makeCircle(s2, s2->r);
 	__CPROVER_assert(!circleIntersect(circle1, circle2),
 			"Not colliding -- underapproximation should not collide!");
 #endif // CBMC

@@ -1,7 +1,7 @@
-CC        = gcc
+CC        = clang
 CFLAGS    = -g3 -std=c99 -pedantic -Wall
-USE_SDL   = -D USE_SDL
-LIBS      = -lSDL2 -lSDL2_mixer -lSDL2_ttf -lm
+USE_SDL   = -D USE_SDL -D_THREAD_SAFE -I/opt/homebrew/include -I/opt/homebrew/include/SDL2
+LIBS      = -lSDL2 -lSDL2_mixer -lSDL2_ttf -lm -L/opt/homebrew/lib
 NOSDL_OBJ = main-nosdl.o
 OBJ       = main.o
 SRC       = src
